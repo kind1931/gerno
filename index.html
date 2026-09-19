@@ -26,7 +26,7 @@
     }
 
     .container {
-      max-width: 1280px;
+      max-width: 1380px;
       margin: 0 auto;
       background: var(--card-bg);
       padding: 24px;
@@ -70,6 +70,7 @@
     .btn-save { background-color: var(--accent); }
     .btn-reset { background-color: var(--danger); }
     .btn-delete { background-color: #64748b; }
+    .btn-toggle { background-color: #8b5cf6; }
 
     .notice {
       font-size: 13px;
@@ -112,15 +113,19 @@
       min-width: 220px;
     }
 
-    /* Top Summary Panel */
+    /* Top Summary Panel - Sticky 적용 */
     .summary-panel {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 16px;
-      background: #f8fafc;
-      padding: 20px;
+      background: #ffffff;
+      padding: 16px 20px;
       border-radius: 8px;
       border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       margin-bottom: 24px;
     }
 
@@ -146,7 +151,7 @@
     }
 
     .summary-item .value {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: #0f172a;
       padding: 6px 0;
@@ -159,7 +164,7 @@
       gap: 24px;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1024px) {
       .grid-container {
         grid-template-columns: 1fr;
       }
@@ -202,7 +207,8 @@
     }
 
     /* Input Style */
-    input[type="number"].qty-input {
+    input[type="number"].qty-input,
+    input[type="number"].val-input {
       width: 60px;
       padding: 4px 6px;
       text-align: center;
@@ -212,7 +218,8 @@
       font-weight: bold;
     }
 
-    input[type="number"].qty-input:focus {
+    input[type="number"].qty-input:focus,
+    input[type="number"].val-input:focus {
       outline: 2px solid var(--accent);
       background-color: #fff;
     }
@@ -220,6 +227,16 @@
     tr.has-value {
       background-color: var(--highlight);
       font-weight: bold;
+    }
+
+    /* Profit Text Colors */
+    .profit-positive { color: #059669; font-weight: bold; }
+    .profit-negative { color: #dc2626; font-weight: bold; }
+    .profit-zero { color: #6b7280; font-weight: bold; }
+
+    /* On/Off Toggle Classes */
+    .profit-mode-off .profit-element {
+      display: none !important;
     }
 
     /* Toast Notification */
@@ -248,12 +265,13 @@
     }
   </style>
 </head>
-<body>
+<body class="profit-mode-off">
 
 <div class="container">
   <div class="header-area">
     <h1>거상 2026 추석 캐쉬 할인 구매 계산기</h1>
     <div class="btn-group">
+      <button class="btn btn-toggle" onclick="toggleProfitMode()">👁️ 차익 계산 켜기/끄기</button>
       <button class="btn btn-reset" onclick="resetAll()">🔄 수량 초기화</button>
     </div>
   </div>
@@ -272,33 +290,32 @@
     <div class="load-input-group">
       <label for="save-select">📂 불러오기:</label>
       <select id="save-select" onchange="onSelectChange(this)">
-        <!-- JS로 저장된 목록이 이름순으로 채워집니다 -->
       </select>
       <button class="btn btn-delete" onclick="deleteFromCache()">삭제</button>
     </div>
   </div>
 
-  <!-- 상단 요약 정보 -->
+  <!-- 상단 요약 정보 (스크롤 시 고정됨) -->
   <div class="summary-panel">
     <div class="summary-item">
       <label for="rate">캐쉬 비율 (1만원당 지전)</label>
-      <input type="number" id="rate" value="3.2" step="0.1" oninput="calculate()">
-    </div>
-    <div class="summary-item">
-      <label>총 필요 현금(원)</label>
-      <div class="value" id="total-cash">0 원</div>
+      <input type="number" id="rate" value="3.2" step="0.1" oninput="handleCommonInput()">
     </div>
     <div class="summary-item">
       <label>총 필요 현금(만원)</label>
       <div class="value" id="total-cash-10k">0 만원</div>
     </div>
     <div class="summary-item">
-      <label>필요 지전(개)</label>
-      <div class="value" id="total-jijeon">0 개</div>
+      <label>필요 지전</label>
+      <div class="value" id="total-jijeon">0 냥</div>
     </div>
-    <div class="summary-item">
-      <label>필요 거상머니</label>
-      <div class="value" id="total-money">0 냥</div>
+    <div class="summary-item profit-element">
+      <label>총 재화가치</label>
+      <div class="value" id="total-comp-value">0 냥</div>
+    </div>
+    <div class="summary-item profit-element">
+      <label>총 차익 (총재화가치 - 필요지전)</label>
+      <div class="value" id="total-profit">0 냥</div>
     </div>
   </div>
 
@@ -313,10 +330,10 @@
             <th>단가(원)</th>
             <th>수량</th>
             <th>금액(원)</th>
+            <th class="profit-element">차익(만 냥)</th>
           </tr>
         </thead>
         <tbody id="product-list">
-          <!-- JS로 상품 항목 생성 -->
         </tbody>
       </table>
     </div>
@@ -327,11 +344,11 @@
         <thead>
           <tr>
             <th>구성품 집계 항목</th>
-            <th>총 수량</th>
+            <th class="profit-element" style="width: 100px;">재화가치(억)</th>
+            <th style="width: 70px;">총 수량</th>
           </tr>
         </thead>
         <tbody id="component-list">
-          <!-- JS로 구성품 수량 자동 업데이트 -->
         </tbody>
       </table>
     </div>
@@ -344,45 +361,62 @@
 <script>
 // 상품 정보 데이터
 const products = [
-  { id: 'p1', type: '단일상품', name: '불사조의깃털', price: 3500, comp: '불사조의깃털' },
-  { id: 'p2', type: '단일상품', name: '봉황의깃털', price: 3500, comp: '봉황의깃털' },
-  { id: 'p3', type: '단일상품', name: '봉인의돌', price: 4000, comp: '봉인의돌' },
-  { id: 'p4', type: '단일상품', name: '봉인의서', price: 4000, comp: '봉인의서' },
-  { id: 'p5', type: '단일상품', name: '각성석', price: 5000, comp: '각성석' },
-  { id: 'p6', type: '단일상품', name: '봉기부', price: 6000, comp: '봉기부' },
-  { id: 'p7', type: '단일상품', name: '개명허가서', price: 7000, comp: '개명허가서' },
-  { id: 'p8', type: '단일상품', name: '규화보전 + 철희상자', price: 8000, comp: '규화보전 + 철희상자' },
-  { id: 'p9', type: '단일상품', name: '식객명부1차 장수 + 철희상자', price: 8000, comp: '식객명부1차 장수 + 철희상자' },
-  { id: 'p10', type: '단일상품', name: '식객명부2차 장수 + 철희상자', price: 8000, comp: '식객명부2차 장수 + 철희상자' },
-  { id: 'p11', type: '단일상품', name: '주머니확장증서 + 철희상자', price: 9000, comp: '주머니확장증서 + 철희상자' },
-  { id: 'p12', type: '단일상품', name: '귀화의서약(조선) + 철희상자', price: 10000, comp: '귀화의서약(조선) + 철희상자' },
-  { id: 'p13', type: '단일상품', name: '귀화의서약(중국) + 철희상자', price: 10000, comp: '귀화의서약(중국) + 철희상자' },
-  { id: 'p14', type: '단일상품', name: '귀화의서약(일본) + 철희상자', price: 10000, comp: '귀화의서약(일본) + 철희상자' },
-  { id: 'p15', type: '단일상품', name: '귀화의서약(대만) + 철희상자', price: 10000, comp: '귀화의서약(대만) + 철희상자' },
-  { id: 'p16', type: '단일상품', name: '직업서(무투가) + 철희상자', price: 10000, comp: '직업서(무투가) + 철희상자' },
-  { id: 'p17', type: '단일상품', name: '직업서(악사) + 철희상자', price: 10000, comp: '직업서(악사) + 철희상자' },
-  { id: 'p18', type: '단일상품', name: '환생의서 + 철희상자', price: 14000, comp: '환생의서 + 철희상자' },
-  { id: 'p19', type: '단일상품', name: '다재다능 + 철희상자', price: 16000, comp: '다재다능 + 철희상자' },
+  { id: 'p1', type: '단일상품', name: '불사조의깃털', price: 3500, compDesc: '불사조의깃털', compItems: [{ name: '불사조의깃털', qty: 1 }] },
+  { id: 'p2', type: '단일상품', name: '봉황의깃털', price: 3500, compDesc: '봉황의깃털', compItems: [{ name: '봉황의깃털', qty: 1 }] },
+  { id: 'p3', type: '단일상품', name: '봉인의돌', price: 4000, compDesc: '봉인의돌', compItems: [{ name: '봉인의돌', qty: 1 }] },
+  { id: 'p4', type: '단일상품', name: '봉인의서', price: 4000, compDesc: '봉인의서', compItems: [{ name: '봉인의서', qty: 1 }] },
+  { id: 'p5', type: '단일상품', name: '각성석', price: 5000, compDesc: '각성석', compItems: [{ name: '각성석', qty: 1 }] },
+  { id: 'p6', type: '단일상품', name: '봉기부', price: 6000, compDesc: '봉기부', compItems: [{ name: '봉기부', qty: 1 }] },
+  { id: 'p7', type: '단일상품', name: '개명허가서', price: 7000, compDesc: '개명허가서', compItems: [{ name: '개명허가서', qty: 1 }] },
+  { id: 'p8', type: '단일상품', name: '규화보전 + 철희상자', price: 8000, compDesc: '규화보전 + 철희상자', compItems: [{ name: '규화보전', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p9', type: '단일상품', name: '식객명부1차 장수 + 철희상자', price: 8000, compDesc: '식객명부1차 장수 + 철희상자', compItems: [{ name: '식객명부1차 장수', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p10', type: '단일상품', name: '식객명부2차 장수 + 철희상자', price: 8000, compDesc: '식객명부2차 장수 + 철희상자', compItems: [{ name: '식객명부2차 장수', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p11', type: '단일상품', name: '주머니확장증서 + 철희상자', price: 9000, compDesc: '주머니확장증서 + 철희상자', compItems: [{ name: '주머니확장증서', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p12', type: '단일상품', name: '귀화의서약(조선) + 철희상자', price: 10000, compDesc: '귀화의서약(조선) + 철희상자', compItems: [{ name: '귀화의서약(조선)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p13', type: '단일상품', name: '귀화의서약(중국) + 철희상자', price: 10000, compDesc: '귀화의서약(중국) + 철희상자', compItems: [{ name: '귀화의서약(중국)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p14', type: '단일상품', name: '귀화의서약(일본) + 철희상자', price: 10000, compDesc: '귀화의서약(일본) + 철희상자', compItems: [{ name: '귀화의서약(일본)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p15', type: '단일상품', name: '귀화의서약(대만) + 철희상자', price: 10000, compDesc: '귀화의서약(대만) + 철희상자', compItems: [{ name: '귀화의서약(대만)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p16', type: '단일상품', name: '직업서(무투가) + 철희상자', price: 10000, compDesc: '직업서(무투가) + 철희상자', compItems: [{ name: '직업서(무투가)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p17', type: '단일상품', name: '직업서(악사) + 철희상자', price: 10000, compDesc: '직업서(악사) + 철희상자', compItems: [{ name: '직업서(악사)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p18', type: '단일상품', name: '환생의서 + 철희상자', price: 14000, compDesc: '환생의서 + 철희상자', compItems: [{ name: '환생의서', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p19', type: '단일상품', name: '다재다능 + 철희상자', price: 16000, compDesc: '다재다능 + 철희상자', compItems: [{ name: '다재다능', qty: 1 }, { name: '철희상자', qty: 1 }] },
   
-  { id: 'p20', type: '패키지', name: '옷장 패키지', price: 8000, comp: '옷장 확장증서 × 5 + 철희상자' },
-  { id: 'p21', type: '패키지', name: '깃털패키지', price: 10000, comp: '불사조의깃털 × 2 + 봉황의깃털 + 철희상자' },
-  { id: 'p22', type: '패키지', name: '정령 패키지 - 푸른색 알', price: 14000, comp: '푸른색 알 + 봉인의서 + 일석이조(30일) + 철희상자' },
-  { id: 'p23', type: '패키지', name: '정령 패키지 - 붉은색 알', price: 14000, comp: '붉은색 알 + 봉인의서 + 일석이조(30일) + 철희상자' },
-  { id: 'p24', type: '패키지', name: '정령 패키지 - 백은색 알', price: 14000, comp: '백은색 알 + 봉인의서 + 일석이조(30일) + 철희상자' },
-  { id: 'p25', type: '패키지', name: '정령 패키지 - 황금색 알', price: 14000, comp: '황금색 알 + 봉인의서 + 일석이조(30일) + 철희상자' },
-  { id: 'p26', type: '패키지', name: '정령 패키지 - 초록색 알', price: 14000, comp: '초록색 알 + 봉인의서 + 일석이조(30일) + 철희상자' },
-  { id: 'p27', type: '패키지', name: '식객명부 패키지', price: 18000, comp: '식객명부(용병) + 식객명부(몬스터) + 식객명부(1차) + 식객명부(2차) + 철희상자 × 2' },
-  { id: 'p28', type: '패키지', name: '백의종군 패키지', price: 19000, comp: '백의종군 × 4 + 철희상자 × 2' },
-  { id: 'p29', type: '패키지', name: '봉인의돌 패키지', price: 24000, comp: '봉인의돌 × 6 + 철희상자 × 2' },
-  { id: 'p30', type: '패키지', name: '봉인의서 패키지', price: 24000, comp: '봉인의서 × 6 + 철희상자 × 2' },
-  { id: 'p31', type: '패키지', name: '종합 선물세트', price: 33000, comp: '손자병법 + 2차 식객명부 + 각성석 + 불사조의깃털 + 철희상자 × 3' },
-  { id: 'p32', type: '패키지', name: '귀서 패키지', price: 45000, comp: '귀화의서약(조선) + 귀화의서약(중국) + 귀화의서약(일본) + 귀화의서약(대만) + 불사조의깃털 + 봉황의깃털 + 철희상자 × 5' }
+  { id: 'p20', type: '패키지', name: '옷장 패키지', price: 8000, compDesc: '옷장 확장증서 × 5 + 철희상자', compItems: [{ name: '옷장 확장증서', qty: 5 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p21', type: '패키지', name: '깃털패키지', price: 10000, compDesc: '불사조의깃털 × 2 + 봉황의깃털 + 철희상자', compItems: [{ name: '불사조의깃털', qty: 2 }, { name: '봉황의깃털', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p22', type: '패키지', name: '정령 패키지 - 푸른색 알', price: 14000, compDesc: '푸른색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '푸른색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p23', type: '패키지', name: '정령 패키지 - 붉은색 알', price: 14000, compDesc: '붉은색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '붉은색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p24', type: '패키지', name: '정령 패키지 - 백은색 알', price: 14000, compDesc: '백은색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '백은색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p25', type: '패키지', name: '정령 패키지 - 황금색 알', price: 14000, compDesc: '황금색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '황금색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p26', type: '패키지', name: '정령 패키지 - 초록색 알', price: 14000, compDesc: '초록색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '초록색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p27', type: '패키지', name: '식객명부 패키지', price: 18000, compDesc: '식객명부(용병) + 식객명부(몬스터) + 식객명부(1차) + 식객명부(2차) + 철희상자 × 2', compItems: [{ name: '식객명부(용병)', qty: 1 }, { name: '식객명부(몬스터)', qty: 1 }, { name: '식객명부(1차)', qty: 1 }, { name: '식객명부(2차)', qty: 1 }, { name: '철희상자', qty: 2 }] },
+  { id: 'p28', type: '패키지', name: '백의종군 패키지', price: 19000, compDesc: '백의종군 × 4 + 철희상자 × 2', compItems: [{ name: '백의종군', qty: 4 }, { name: '철희상자', qty: 2 }] },
+  { id: 'p29', type: '패키지', name: '봉인의돌 패키지', price: 24000, compDesc: '봉인의돌 × 6 + 철희상자 × 2', compItems: [{ name: '봉인의돌', qty: 6 }, { name: '철희상자', qty: 2 }] },
+  { id: 'p30', type: '패키지', name: '봉인의서 패키지', price: 24000, compDesc: '봉인의서 × 6 + 철희상자 × 2', compItems: [{ name: '봉인의서', qty: 6 }, { name: '철희상자', qty: 2 }] },
+  { id: 'p31', type: '패키지', name: '종합 선물세트', price: 33000, compDesc: '손자병법 + 2차 식객명부 + 각성석 + 불사조의깃털 + 철희상자 × 3', compItems: [{ name: '손자병법', qty: 1 }, { name: '2차 식객명부', qty: 1 }, { name: '각성석', qty: 1 }, { name: '불사조의깃털', qty: 1 }, { name: '철희상자', qty: 3 }] },
+  { id: 'p32', type: '패키지', name: '귀서 패키지', price: 45000, compDesc: '귀화의서약(조선) + 귀화의서약(중국) + 귀화의서약(일본) + 귀화의서약(대만) + 불사조의깃털 + 봉황의깃털 + 철희상자 × 5', compItems: [{ name: '귀화의서약(조선)', qty: 1 }, { name: '귀화의서약(중국)', qty: 1 }, { name: '귀화의서약(일본)', qty: 1 }, { name: '귀화의서약(대만)', qty: 1 }, { name: '불사조의깃털', qty: 1 }, { name: '봉황의깃털', qty: 1 }, { name: '철희상자', qty: 5 }] }
+];
+
+const compNames = [
+  '불사조의깃털', '봉황의깃털', '봉인의돌', '봉인의서', '각성석', '봉기부', '개명허가서',
+  '규화보전', '식객명부1차 장수', '식객명부2차 장수', '주머니확장증서', '귀화의서약(조선)',
+  '귀화의서약(중국)', '귀화의서약(일본)', '귀화의서약(대만)', '직업서(무투가)', '직업서(악사)',
+  '환생의서', '다재다능', '옷장 확장증서', '푸른색 알', '붉은색 알', '백은색 알',
+  '황금색 알', '초록색 알', '일석이조(30일)', '식객명부(용병)', '식객명부(몬스터)',
+  '식객명부(1차)', '식객명부(2차)', '백의종군', '손자병법', '2차 식객명부', '철희상자'
 ];
 
 const STORAGE_PREFIX = 'gersang_calc_slot_';
-let isDirty = false; // 변경 사항 감지 플래그
-let currentLoadedSlot = ''; // 현재 로드된 슬롯 이름
+const COMMON_STORAGE_KEY = 'gersang_calc_common_data';
+
+let isDirty = false;
+let currentLoadedSlot = '';
 let previousSelectValue = '';
+let isProfitModeOn = false;
+
+let commonData = {
+  rate: 3.2,
+  values: {}
+};
 
 function showToast(message) {
   const toast = document.getElementById('toast');
@@ -393,7 +427,37 @@ function showToast(message) {
   }, 2500);
 }
 
+function toggleProfitMode() {
+  isProfitModeOn = !isProfitModeOn;
+  if (isProfitModeOn) {
+    document.body.classList.remove('profit-mode-off');
+    showToast('👁️ 차익 계산 항목이 표시됩니다.');
+  } else {
+    document.body.classList.add('profit-mode-off');
+    showToast('🙈 차익 계산 항목이 숨겨집니다.');
+  }
+}
+
+function loadCommonData() {
+  const saved = localStorage.getItem(COMMON_STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed.rate !== undefined) commonData.rate = parsed.rate;
+      if (parsed.values) commonData.values = parsed.values;
+    } catch(e) {}
+  }
+  document.getElementById('rate').value = commonData.rate;
+}
+
+function saveCommonData() {
+  localStorage.setItem(COMMON_STORAGE_KEY, JSON.stringify(commonData));
+}
+
 function init() {
+  loadCommonData();
+
+  // 상품 목록 생성
   const tbody = document.getElementById('product-list');
   tbody.innerHTML = '';
 
@@ -404,7 +468,7 @@ function init() {
       <td class="center-col">${p.type}</td>
       <td>
         <div class="product-title">${p.name}</div>
-        <div class="product-comp">(${p.comp})</div>
+        <div class="product-comp">(${p.compDesc})</div>
       </td>
       <td class="number-col">${p.price.toLocaleString()}</td>
       <td class="center-col">
@@ -412,12 +476,62 @@ function init() {
                oninput="handleInput(this)" onblur="handleBlur(this)">
       </td>
       <td class="number-col" id="subtotal-${p.id}">0</td>
+      <td class="number-col profit-element" id="profit-${p.id}">0</td>
     `;
     tbody.appendChild(tr);
   });
 
+  // 최초 테이블 렌더링
+  renderComponentTable();
   updateSaveOptions();
-  calculate();
+  calculate(false);
+}
+
+// 구성품 테이블 생성/렌더링 (reorder가 true일 때만 수량 순 정렬 후 재생성)
+function renderComponentTable() {
+  const compTbody = document.getElementById('component-list');
+  compTbody.innerHTML = '';
+
+  // 수량 계산
+  const compQuantities = {};
+  compNames.forEach(name => compQuantities[name] = 0);
+  products.forEach(p => {
+    const pQty = getQty(p.id);
+    if (pQty > 0) {
+      p.compItems.forEach(item => {
+        if (compQuantities[item.name] !== undefined) {
+          compQuantities[item.name] += item.qty * pQty;
+        }
+      });
+    }
+  });
+
+  const compRaw = compNames.map(name => ({
+    name: name,
+    val: commonData.values[name] || 0,
+    qty: compQuantities[name]
+  }));
+
+  // 수량이 있는 항목을 상단으로 정렬
+  compRaw.sort((a, b) => {
+    if (a.qty > 0 && b.qty === 0) return -1;
+    if (a.qty === 0 && b.qty > 0) return 1;
+    return 0;
+  });
+
+  compRaw.forEach(item => {
+    const tr = document.createElement('tr');
+    if (item.qty > 0) tr.classList.add('has-value');
+    tr.innerHTML = `
+      <td>${item.name}</td>
+      <td class="center-col profit-element">
+        <input type="number" class="val-input" data-name="${item.name}" value="${item.val}" step="0.01" min="0" max="9.99" 
+               oninput="handleValInput(this)" onblur="handleValBlur(this)">
+      </td>
+      <td class="center-col" id="comp-qty-${item.name}">${item.qty.toLocaleString()}</td>
+    `;
+    compTbody.appendChild(tr);
+  });
 }
 
 function handleInput(input) {
@@ -425,7 +539,7 @@ function handleInput(input) {
     input.value = parseInt(input.value, 10);
   }
   isDirty = true;
-  calculate();
+  calculate(true); // 수량 입력 시엔 정렬 포함 재렌더링
 }
 
 function handleBlur(input) {
@@ -434,11 +548,43 @@ function handleBlur(input) {
   } else {
     input.value = parseInt(input.value, 10);
   }
-  calculate();
+  calculate(true);
+}
+
+function handleCommonInput() {
+  commonData.rate = parseFloat(document.getElementById('rate').value) || 0;
+  saveCommonData();
+  calculate(false);
+}
+
+// 재화가치 입력 처리 (실시간 값 업데이트만 수행 - DOM 재생성 안함)
+function handleValInput(input) {
+  const name = input.getAttribute('data-name');
+  let val = parseFloat(input.value);
+  if (isNaN(val)) val = 0;
+  if (val > 9.99) val = 9.99;
+  if (val < 0) val = 0;
+  commonData.values[name] = val;
+  saveCommonData();
+  calculate(false); // DOM 재생성 없이 숫자만 갱신
+}
+
+// 포커스가 벗어났을 때 소수점 정리 및 정렬
+function handleValBlur(input) {
+  const name = input.getAttribute('data-name');
+  let val = parseFloat(input.value);
+  if (isNaN(val) || val < 0) val = 0;
+  if (val > 9.99) val = 9.99;
+  
+  val = Math.round(val * 100) / 100;
+  input.value = val;
+  commonData.values[name] = val;
+  saveCommonData();
+  calculate(false);
 }
 
 function resetAll() {
-  if (isDirty && !confirm('작성 중인 변경사항이 있습니다. 초기화하시겠습니까?')) {
+  if (isDirty && !confirm('작성 중인 변경사항이 있습니다. 수량을 초기화하시겠습니까?')) {
     return;
   }
   products.forEach(p => {
@@ -450,7 +596,7 @@ function resetAll() {
   previousSelectValue = '';
   currentLoadedSlot = '';
   isDirty = false;
-  calculate();
+  calculate(true);
   showToast('수량이 초기화되었습니다.');
 }
 
@@ -461,7 +607,6 @@ function getQty(id) {
   return isNaN(val) || val < 0 ? 0 : val;
 }
 
-// === 저장소 관리 (이름순 정렬, 자동 이름 생성, 공통 비율) ===
 function getSavedSlots() {
   const slots = {};
   for (let i = 0; i < localStorage.length; i++) {
@@ -481,7 +626,6 @@ function updateSaveOptions() {
   select.innerHTML = '';
   
   const slots = getSavedSlots();
-  // 이름순 정렬 (localeCompare)
   const keys = Object.keys(slots).sort((a, b) => a.localeCompare(b, 'ko'));
 
   const defaultOption = document.createElement('option');
@@ -500,7 +644,6 @@ function updateSaveOptions() {
   previousSelectValue = select.value;
 }
 
-// 임시저장 N 자동 번호 생성기
 function getNextTempName() {
   const slots = getSavedSlots();
   let maxNum = 0;
@@ -518,7 +661,6 @@ function saveToCache(customName = null) {
   const nameInput = document.getElementById('save-name');
   let saveName = customName || nameInput.value.trim();
 
-  // 이름을 입력하지 않았을 경우 자동 처리
   if (!saveName) {
     saveName = getNextTempName();
   }
@@ -528,7 +670,7 @@ function saveToCache(customName = null) {
     quantities[p.id] = getQty(p.id);
   });
 
-  const data = { quantities }; // 수량 데이터만 저장 (비율은 공통)
+  const data = { quantities };
 
   localStorage.setItem(STORAGE_PREFIX + saveName, JSON.stringify(data));
   
@@ -563,14 +705,13 @@ function loadSlot(slotName) {
     previousSelectValue = slotName;
     isDirty = false;
 
-    calculate();
+    calculate(true);
     showToast(`📂 '${slotName}' 세팅을 불러왔습니다.`);
   } catch (e) {
     showToast('데이터를 불러오는 도중 오류가 발생했습니다.');
   }
 }
 
-// 셀렉트박스 선택 변경 핸들러
 function onSelectChange(select) {
   const targetSlot = select.value;
 
@@ -584,7 +725,6 @@ function onSelectChange(select) {
   if (targetSlot) {
     loadSlot(targetSlot);
   } else {
-    // 선택 안함으로 변경 시
     currentLoadedSlot = '';
     previousSelectValue = '';
     document.getElementById('save-name').value = '';
@@ -613,17 +753,81 @@ function deleteFromCache() {
   }
 }
 
-// 계산 로직
-function calculate() {
-  let totalCash = 0;
+// 억, 만 단위 한글 표기 변환 함수
+function formatMoneyKorean(valueInOk) {
+  if (valueInOk === 0) return '0 냥';
 
+  const isNegative = valueInOk < 0;
+  const absOk = Math.abs(valueInOk);
+
+  const totalTenThousand = Math.round(absOk * 10000);
+  const okPart = Math.floor(totalTenThousand / 10000);
+  const manPart = totalTenThousand % 10000;
+
+  let resultStr = '';
+  if (okPart > 0) {
+    resultStr += `${okPart.toLocaleString()}억 `;
+  }
+  if (manPart > 0) {
+    resultStr += `${manPart.toLocaleString()}만 `;
+  }
+
+  if (resultStr === '') resultStr = '0 ';
+
+  return (isNegative ? '-' : '') + resultStr.trim() + ' 냥';
+}
+
+function formatProfitHTML(value, suffix = '') {
+  let colorClass = 'profit-zero';
+  let formatted = value.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2});
+  if (value > 0) {
+    colorClass = 'profit-positive';
+    formatted = '+' + formatted;
+  } else if (value < 0) {
+    colorClass = 'profit-negative';
+  }
+  return `<span class="${colorClass}">${formatted}${suffix}</span>`;
+}
+
+function formatProfitKoreanHTML(valueInOk) {
+  let colorClass = 'profit-zero';
+  const text = formatMoneyKorean(valueInOk);
+
+  if (valueInOk > 0) {
+    colorClass = 'profit-positive';
+    return `<span class="${colorClass}">+${text}</span>`;
+  } else if (valueInOk < 0) {
+    colorClass = 'profit-negative';
+    return `<span class="${colorClass}">${text}</span>`;
+  }
+  return `<span class="${colorClass}">${text}</span>`;
+}
+
+// 계산 로직 (shouldRerenderComp가 true일 때만 우측 구성품 목록을 재정렬하여 새로 그림)
+function calculate(shouldRerenderComp = false) {
+  let totalCash = 0;
+  const rate = parseFloat(document.getElementById('rate').value) || 0;
+
+  // 1. 개별 상품 계산 및 차익 구하기 (차익 = 구성품 재화가치 - 캐쉬비율 구매가격)
   products.forEach(p => {
     const qty = getQty(p.id);
     const subtotal = qty * p.price;
     totalCash += subtotal;
 
     document.getElementById(`subtotal-${p.id}`).innerText = subtotal.toLocaleString();
-    
+
+    const cashValue1Set = rate * p.price; // 캐쉬비율 구매가격 (만 냥)
+
+    let compValue1Set = 0;
+    p.compItems.forEach(item => {
+      const itemValInOk = commonData.values[item.name] || 0;
+      compValue1Set += (itemValInOk * 10000) * item.qty;
+    });
+
+    // 차익 공식 변경: 구성품 재화가치 - 캐쉬비율 구매가격
+    const profit1Set = compValue1Set - cashValue1Set;
+    document.getElementById(`profit-${p.id}`).innerHTML = formatProfitHTML(profit1Set);
+
     const row = document.getElementById(`row-${p.id}`);
     if (qty > 0) {
       row.classList.add('has-value');
@@ -632,80 +836,42 @@ function calculate() {
     }
   });
 
-  const rate = parseFloat(document.getElementById('rate').value) || 0;
+  // 상단 요약 값 업데이트
   const totalCash10k = totalCash / 10000;
-  const totalJijeon = totalCash10k * rate;
-  const totalMoney = totalJijeon * 100000000;
+  const totalJijeonInOk = totalCash10k * rate; // 필요지전 (억 단위)
 
-  document.getElementById('total-cash').innerText = totalCash.toLocaleString() + ' 원';
   document.getElementById('total-cash-10k').innerText = totalCash10k.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' 만원';
-  document.getElementById('total-jijeon').innerText = totalJijeon.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' 개';
-  document.getElementById('total-money').innerText = totalMoney.toLocaleString() + ' 냥';
+  document.getElementById('total-jijeon').innerText = formatMoneyKorean(totalJijeonInOk);
 
-  // 구성품 집계
-  const compRaw = [
-    { name: '불사조의깃털', qty: getQty('p1') + getQty('p21') * 2 + getQty('p31') * 1 + getQty('p32') * 1 },
-    { name: '봉황의깃털', qty: getQty('p2') + getQty('p21') * 1 + getQty('p32') * 1 },
-    { name: '봉인의돌', qty: getQty('p3') + getQty('p29') * 6 },
-    { name: '봉인의서', qty: getQty('p4') + getQty('p22') + getQty('p23') + getQty('p24') + getQty('p25') + getQty('p26') + getQty('p30') * 6 },
-    { name: '각성석', qty: getQty('p5') + getQty('p31') * 1 },
-    { name: '봉기부', qty: getQty('p6') },
-    { name: '개명허가서', qty: getQty('p7') },
-    { name: '규화보전', qty: getQty('p8') },
-    { name: '식객명부1차 장수', qty: getQty('p9') },
-    { name: '식객명부2차 장수', qty: getQty('p10') },
-    { name: '주머니확장증서', qty: getQty('p11') },
-    { name: '귀화의서약(조선)', qty: getQty('p12') + getQty('p32') * 1 },
-    { name: '귀화의서약(중국)', qty: getQty('p13') + getQty('p32') * 1 },
-    { name: '귀화의서약(일본)', qty: getQty('p14') + getQty('p32') * 1 },
-    { name: '귀화의서약(대만)', qty: getQty('p15') + getQty('p32') * 1 },
-    { name: '직업서(무투가)', qty: getQty('p16') },
-    { name: '직업서(악사)', qty: getQty('p17') },
-    { name: '환생의서', qty: getQty('p18') },
-    { name: '다재다능', qty: getQty('p19') },
-    { name: '옷장 확장증서', qty: getQty('p20') * 5 },
-    { name: '푸른색 알', qty: getQty('p22') },
-    { name: '붉은색 알', qty: getQty('p23') },
-    { name: '백은색 알', qty: getQty('p24') },
-    { name: '황금색 알', qty: getQty('p25') },
-    { name: '초록색 알', qty: getQty('p26') },
-    { name: '일석이조(30일)', qty: getQty('p22') + getQty('p23') + getQty('p24') + getQty('p25') + getQty('p26') },
-    { name: '식객명부(용병)', qty: getQty('p27') },
-    { name: '식객명부(몬스터)', qty: getQty('p27') },
-    { name: '식객명부(1차)', qty: getQty('p27') },
-    { name: '식객명부(2차)', qty: getQty('p27') },
-    { name: '백의종군', qty: getQty('p28') * 4 },
-    { name: '손자병법', qty: getQty('p31') },
-    { name: '2차 식객명부', qty: getQty('p31') },
-    { name: '철희상자', qty: (
-        getQty('p8') + getQty('p9') + getQty('p10') + getQty('p11') + getQty('p12') + 
-        getQty('p13') + getQty('p14') + getQty('p15') + getQty('p16') + getQty('p17') + 
-        getQty('p18') + getQty('p19') + getQty('p20') + getQty('p21') + getQty('p22') + 
-        getQty('p23') + getQty('p24') + getQty('p25') + getQty('p26') + 
-        getQty('p27') * 2 + getQty('p28') * 2 + getQty('p29') * 2 + getQty('p30') * 2 + 
-        getQty('p31') * 3 + getQty('p32') * 5
-      )
-    }
-  ];
+  // 2. 구성품 수량 및 재화가치 집계
+  if (shouldRerenderComp) {
+    renderComponentTable();
+  }
 
-  compRaw.sort((a, b) => {
-    if (a.qty > 0 && b.qty === 0) return -1;
-    if (a.qty === 0 && b.qty > 0) return 1;
-    return 0;
+  let totalCompValueSumOk = 0;
+  compNames.forEach(name => {
+    let pQtyTotal = 0;
+    products.forEach(p => {
+      const pQty = getQty(p.id);
+      if (pQty > 0) {
+        p.compItems.forEach(item => {
+          if (item.name === name) pQtyTotal += item.qty * pQty;
+        });
+      }
+    });
+
+    const val = commonData.values[name] || 0;
+    totalCompValueSumOk += val * pQtyTotal;
+
+    const qtyCell = document.getElementById(`comp-qty-${name}`);
+    if (qtyCell) qtyCell.innerText = pQtyTotal.toLocaleString();
   });
 
-  const compTbody = document.getElementById('component-list');
-  compTbody.innerHTML = '';
+  // 3. 총 재화가치 및 총 차익 표시 (총차익 = 총재화가치 - 필요지전)
+  document.getElementById('total-comp-value').innerText = formatMoneyKorean(totalCompValueSumOk);
 
-  compRaw.forEach(item => {
-    const tr = document.createElement('tr');
-    if (item.qty > 0) tr.classList.add('has-value');
-    tr.innerHTML = `
-      <td>${item.name}</td>
-      <td class="center-col">${item.qty.toLocaleString()}</td>
-    `;
-    compTbody.appendChild(tr);
-  });
+  const totalProfit = totalCompValueSumOk - totalJijeonInOk;
+  document.getElementById('total-profit').innerHTML = formatProfitKoreanHTML(totalProfit);
 }
 
 window.onload = init;
