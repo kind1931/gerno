@@ -190,6 +190,17 @@
       text-align: center;
     }
 
+    /* 수량 클릭 헤더 전용 스타일 */
+    th.clickable-header {
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s;
+    }
+    th.clickable-header:hover {
+      background-color: #e2e8f0;
+      color: var(--accent);
+    }
+
     .number-col { text-align: right; }
     .center-col { text-align: center; }
 
@@ -227,6 +238,11 @@
     tr.has-value {
       background-color: var(--highlight);
       font-weight: bold;
+    }
+
+    /* 상품 목록 수량 0 숨김 스타일 */
+    tr.hide-zero {
+      display: none !important;
     }
 
     /* Profit Text Colors */
@@ -277,7 +293,8 @@
   </div>
   <div class="notice">
     ※ 이름을 입력 후 <b>💾 저장하기</b>를 누르면 설정이 기록되며, 이름을 비워두면 '임시저장 1' 형식으로 자동 저장됩니다.<br>
-    ※ <b>📂 불러오기 목록</b>에서 항목을 선택하면 자동으로 해당 세팅이 로드됩니다.
+    ※ <b>📂 불러오기 목록</b>에서 항목을 선택하면 자동으로 해당 세팅이 로드됩니다.<br>
+    ※ 상품 선택 테이블의 <b>[수량] 헤더를 클릭</b>하면 수량이 0인 상품을 숨기거나 다시 표시할 수 있습니다.
   </div>
 
   <!-- 저장/불러오기 관리 패널 -->
@@ -328,9 +345,11 @@
             <th>구분</th>
             <th>상품명 및 구성품</th>
             <th>단가(원)</th>
-            <th>수량</th>
+            <th class="clickable-header" onclick="toggleZeroItems()" title="클릭하여 수량 0인 상품 숨기기/보이기">
+              수량 <span id="qty-toggle-icon">👁️</span>
+            </th>
             <th>금액(원)</th>
-            <th class="profit-element">차익(만 냥)</th>
+            <th class="profit-element">차익<br>(만 냥)</th>
           </tr>
         </thead>
         <tbody id="product-list">
@@ -345,7 +364,7 @@
           <tr>
             <th>구성품 집계 항목</th>
             <th class="profit-element" style="width: 100px;">재화가치(억)</th>
-            <th style="width: 70px;">총 수량</th>
+            <th style="width: 80px;">총 수량</th>
           </tr>
         </thead>
         <tbody id="component-list">
@@ -412,6 +431,7 @@ let isDirty = false;
 let currentLoadedSlot = '';
 let previousSelectValue = '';
 let isProfitModeOn = false;
+let isZeroHidden = false; // 상품 수량 0 숨김 상태 변수
 
 let commonData = {
   rate: 3.2,
@@ -425,6 +445,21 @@ function showToast(message) {
   setTimeout(() => {
     toast.classList.remove('show');
   }, 2500);
+}
+
+// 좌측 상품 수량 0 숨기기/보이기 토글
+function toggleZeroItems() {
+  isZeroHidden = !isZeroHidden;
+  const icon = document.getElementById('qty-toggle-icon');
+
+  if (isZeroHidden) {
+    icon.innerText = '🙈';
+    showToast('🙈 수량이 0인 상품이 숨겨졌습니다.');
+  } else {
+    icon.innerText = '👁️';
+    showToast('👁️ 모든 상품이 표시됩니다.');
+  }
+  calculate(false);
 }
 
 function toggleProfitMode() {
@@ -487,7 +522,7 @@ function init() {
   calculate(false);
 }
 
-// 구성품 테이블 생성/렌더링 (reorder가 true일 때만 수량 순 정렬 후 재생성)
+// 구성품 테이블 생성/렌더링 (항상 전체 항목 표시)
 function renderComponentTable() {
   const compTbody = document.getElementById('component-list');
   compTbody.innerHTML = '';
@@ -521,7 +556,9 @@ function renderComponentTable() {
 
   compRaw.forEach(item => {
     const tr = document.createElement('tr');
+    tr.id = `comp-row-${item.name}`;
     if (item.qty > 0) tr.classList.add('has-value');
+    
     tr.innerHTML = `
       <td>${item.name}</td>
       <td class="center-col profit-element">
@@ -557,7 +594,7 @@ function handleCommonInput() {
   calculate(false);
 }
 
-// 재화가치 입력 처리 (실시간 값 업데이트만 수행 - DOM 재생성 안함)
+// 재화가치 입력 처리 (실시간 값 업데이트)
 function handleValInput(input) {
   const name = input.getAttribute('data-name');
   let val = parseFloat(input.value);
@@ -566,10 +603,10 @@ function handleValInput(input) {
   if (val < 0) val = 0;
   commonData.values[name] = val;
   saveCommonData();
-  calculate(false); // DOM 재생성 없이 숫자만 갱신
+  calculate(false);
 }
 
-// 포커스가 벗어났을 때 소수점 정리 및 정렬
+// 포커스가 벗어났을 때 소수점 정리
 function handleValBlur(input) {
   const name = input.getAttribute('data-name');
   let val = parseFloat(input.value);
@@ -803,12 +840,12 @@ function formatProfitKoreanHTML(valueInOk) {
   return `<span class="${colorClass}">${text}</span>`;
 }
 
-// 계산 로직 (shouldRerenderComp가 true일 때만 우측 구성품 목록을 재정렬하여 새로 그림)
+// 계산 로직
 function calculate(shouldRerenderComp = false) {
   let totalCash = 0;
   const rate = parseFloat(document.getElementById('rate').value) || 0;
 
-  // 1. 개별 상품 계산 및 차익 구하기 (차익 = 구성품 재화가치 - 캐쉬비율 구매가격)
+  // 1. 개별 상품 계산 및 차익 구하기
   products.forEach(p => {
     const qty = getQty(p.id);
     const subtotal = qty * p.price;
@@ -816,7 +853,7 @@ function calculate(shouldRerenderComp = false) {
 
     document.getElementById(`subtotal-${p.id}`).innerText = subtotal.toLocaleString();
 
-    const cashValue1Set = rate * p.price; // 캐쉬비율 구매가격 (만 냥)
+    const cashValue1Set = rate * p.price;
 
     let compValue1Set = 0;
     p.compItems.forEach(item => {
@@ -824,21 +861,26 @@ function calculate(shouldRerenderComp = false) {
       compValue1Set += (itemValInOk * 10000) * item.qty;
     });
 
-    // 차익 공식 변경: 구성품 재화가치 - 캐쉬비율 구매가격
     const profit1Set = compValue1Set - cashValue1Set;
     document.getElementById(`profit-${p.id}`).innerHTML = formatProfitHTML(profit1Set);
 
     const row = document.getElementById(`row-${p.id}`);
     if (qty > 0) {
       row.classList.add('has-value');
+      row.classList.remove('hide-zero');
     } else {
       row.classList.remove('has-value');
+      if (isZeroHidden) {
+        row.classList.add('hide-zero');
+      } else {
+        row.classList.remove('hide-zero');
+      }
     }
   });
 
   // 상단 요약 값 업데이트
   const totalCash10k = totalCash / 10000;
-  const totalJijeonInOk = totalCash10k * rate; // 필요지전 (억 단위)
+  const totalJijeonInOk = totalCash10k * rate;
 
   document.getElementById('total-cash-10k').innerText = totalCash10k.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' 만원';
   document.getElementById('total-jijeon').innerText = formatMoneyKorean(totalJijeonInOk);
@@ -865,9 +907,18 @@ function calculate(shouldRerenderComp = false) {
 
     const qtyCell = document.getElementById(`comp-qty-${name}`);
     if (qtyCell) qtyCell.innerText = pQtyTotal.toLocaleString();
+
+    const compRow = document.getElementById(`comp-row-${name}`);
+    if (compRow) {
+      if (pQtyTotal > 0) {
+        compRow.classList.add('has-value');
+      } else {
+        compRow.classList.remove('has-value');
+      }
+    }
   });
 
-  // 3. 총 재화가치 및 총 차익 표시 (총차익 = 총재화가치 - 필요지전)
+  // 3. 총 재화가치 및 총 차익 표시
   document.getElementById('total-comp-value').innerText = formatMoneyKorean(totalCompValueSumOk);
 
   const totalProfit = totalCompValueSumOk - totalJijeonInOk;
