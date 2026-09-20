@@ -223,7 +223,7 @@
     }
 
     /* Product Name & Sub Description Style */
-    .product-cell, .comp-cell {
+    .product-cell {
       display: flex;
       align-items: center;
     }
@@ -321,7 +321,7 @@
   <div class="notice">
     ※ 이름을 입력 후 <b>💾 저장하기</b>를 누르면 설정이 기록되며, 이름을 비워두면 '임시저장 1' 형식으로 자동 저장됩니다.<br>
     ※ <b>📂 불러오기 목록</b>에서 항목을 선택하면 자동으로 해당 세팅이 로드됩니다.<br>
-    ※ 상품 및 구성품 이름 옆의 <b>★ 별 아이콘</b>을 클릭하면 즐겨찾기로 상단에 고정되며, 브라우저에 자동 저장됩니다.<br>
+    ※ 상품 이름 옆의 <b>★ 별 아이콘</b>을 클릭하면 즐겨찾기로 상단에 고정되며, 브라우저에 자동 저장됩니다.<br>
     ※ 상품 선택 테이블의 <b>[수량] 헤더를 클릭</b>하면 수량이 0인 상품을 숨기거나 다시 표시할 수 있습니다.
   </div>
 
@@ -462,7 +462,7 @@ let previousSelectValue = '';
 let isProfitModeOn = false;
 let isZeroHidden = false;
 
-// 즐겨찾기 상태 관리를 위한 Set (독립 저장)
+// 상품 즐겨찾기 상태 관리를 위한 Set
 let favorites = new Set();
 
 let commonData = {
@@ -506,7 +506,6 @@ function toggleFavorite(id, name) {
   
   // 상태 변경 후 목록 재정렬 및 렌더링
   renderProductTable();
-  renderComponentTable();
   calculate(false);
 }
 
@@ -611,7 +610,7 @@ function renderProductTable() {
   });
 }
 
-// 구성품 테이블 생성/렌더링 (즐겨찾기 ➔ 수량 존재 ➔ 일반 순서 정렬)
+// 구성품 테이블 생성/렌더링 (수량 존재 여부 기준 우선 정렬)
 function renderComponentTable() {
   const compTbody = document.getElementById('component-list');
   compTbody.innerHTML = '';
@@ -633,18 +632,13 @@ function renderComponentTable() {
   const compRaw = compNames.map(name => ({
     name: name,
     val: commonData.values[name] || 0,
-    qty: compQuantities[name],
-    isFav: favorites.has(`comp_${name}`)
+    qty: compQuantities[name]
   }));
 
-  // 정렬 우선순위: 1) 즐겨찾기 항목 2) 수량이 있는 항목 3) 일반 항목
+  // 정렬 우선순위: 수량이 있는 항목 ➔ 일반 항목
   compRaw.sort((a, b) => {
-    if (a.isFav && !b.isFav) return -1;
-    if (!a.isFav && b.isFav) return 1;
-    
     if (a.qty > 0 && b.qty === 0) return -1;
     if (a.qty === 0 && b.qty > 0) return 1;
-    
     return 0;
   });
 
@@ -652,16 +646,10 @@ function renderComponentTable() {
     const tr = document.createElement('tr');
     tr.id = `comp-row-${item.name}`;
     if (item.qty > 0) tr.classList.add('has-value');
-    
-    const favKey = `comp_${item.name}`;
-    const isFav = favorites.has(favKey);
 
     tr.innerHTML = `
       <td>
-        <div class="comp-cell">
-          <span class="star-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${favKey}', '${item.name}')">${isFav ? '★' : '☆'}</span>
-          <span>${item.name}</span>
-        </div>
+        <span>${item.name}</span>
       </td>
       <td class="center-col profit-element">
         <input type="number" class="val-input" data-name="${item.name}" value="${item.val}" step="0.01" min="0" max="9.99" 
