@@ -7,12 +7,11 @@
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-
         gtag('config', 'G-XT7WN5EW7B');
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>철희상자 적정가 계산기</title>
+    <title>철희상자 적정가 계산기 & 시뮬레이터</title>
     <style>
         :root {
             --bg-color: #f4f6f8;
@@ -21,6 +20,9 @@
             --border-color: #e2e8f0;
             --text-color: #2d3748;
             --untradeable-color: #e53e3e;
+            --accent-color: #ed8936;
+            --profit-color: #2f855a; /* 이익: 초록색 */
+            --loss-color: #e53e3e;   /* 손해: 빨간색 */
         }
 
         .box-modal-overlay {
@@ -37,8 +39,8 @@
         .box-modal-container {
             background-color: var(--card-bg);
             width: 90%;
-            max-width: 950px;
-            max-height: 85vh;
+            max-width: 980px;
+            max-height: 90vh;
             border-radius: 12px;
             padding: 24px;
             overflow-y: auto;
@@ -67,6 +69,182 @@
             align-items: center;
         }
 
+        /* 시뮬레이터 토글 버튼 */
+        .btn-toggle-sim {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 15px;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-toggle-sim:hover { background-color: #dd6b20; }
+
+        /* 시뮬레이터 섹션 스타일 (기본 숨김) */
+        .sim-card {
+            display: none;
+            background-color: #fffaf0;
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .sim-card.active {
+            display: block;
+        }
+
+        .sim-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #c05621;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sim-price-setting {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #feebc8;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .sim-price-input {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        .sim-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .btn-sim {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-sim:hover { background-color: #dd6b20; }
+        .btn-sim-reset { background-color: #718096; }
+        .btn-sim-reset:hover { background-color: #4a5568; }
+
+        .sim-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #feebc8;
+            margin-bottom: 12px;
+            font-size: 0.88rem;
+        }
+
+        .sim-summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sim-summary-item label {
+            font-size: 0.75rem;
+            color: #718096;
+        }
+
+        .sim-summary-item val {
+            font-weight: bold;
+            font-size: 1.05rem;
+            color: var(--text-color);
+        }
+
+        /* 손익 금액 색상 설정 */
+        .color-profit { color: var(--profit-color) !important; }
+        .color-loss { color: var(--loss-color) !important; }
+
+        .sim-log-box {
+            background-color: #ffffff;
+            border: 1px solid #feebc8;
+            border-radius: 8px;
+            padding: 10px 14px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+        }
+
+        .sim-log-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px dashed #edf2f7;
+        }
+        .sim-log-item:last-child { border-bottom: none; }
+        .sim-log-jackpot { color: #dd6b20; font-weight: bold; }
+
+        /* 누적 획득 결과 테이블 스타일 */
+        .sim-result-table-wrapper {
+            background-color: #ffffff;
+            border: 1px solid #feebc8;
+            border-radius: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .sim-result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .sim-result-table th {
+            position: sticky;
+            top: 0;
+            background-color: #fffaf0;
+            color: #c05621;
+            padding: 8px;
+            border-bottom: 1px solid #feebc8;
+            text-align: left;
+        }
+
+        .sim-result-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .sim-result-table tr.jackpot-row {
+            background-color: #fffaf0;
+            font-weight: bold;
+            color: #c05621;
+        }
+
+        /* 결과 카드 스타일 */
         .result-card {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -163,6 +341,74 @@
             </div>
         </div>
 
+        <!-- 시뮬레이터 열기/접기 버튼 -->
+        <button class="btn-toggle-sim" onclick="toggleSimulator()">🎰 가상 상자 까기 시뮬레이터 열기</button>
+
+        <!-- 가상 상자 까기 시뮬레이터 카드 (기본 숨김) -->
+        <div class="sim-card" id="sim-card">
+            <div class="sim-title">
+                <span>🎰 가상 상자 개봉 시뮬레이터</span>
+            </div>
+
+            <!-- 구매상자 가격 설정 -->
+            <div class="sim-price-setting">
+                <span>📦 상자 1개 구매 가격:</span>
+                <input type="number" id="sim-box-buy-price" class="sim-price-input" value="0.70" step="0.01" min="0" oninput="updateSimUIOnly()">
+                <span>억 냥</span>
+            </div>
+
+            <div class="sim-controls">
+                <button class="btn-sim" onclick="openBoxes(1)">1개 개봉</button>
+                <button class="btn-sim" onclick="openBoxes(10)">10개 개봉</button>
+                <button class="btn-sim" onclick="openBoxes(100)">100개 개봉</button>
+                <button class="btn-sim" onclick="openBoxes(1000)">1,000개 개봉</button>
+                <button class="btn-sim btn-sim-reset" onclick="resetSimData()">초기화</button>
+            </div>
+            
+            <div class="sim-summary">
+                <div class="sim-summary-item">
+                    <label>총 개봉 수</label>
+                    <val id="sim-total-count">0 개</val>
+                </div>
+                <div class="sim-summary-item">
+                    <label>상자 총 구매비용</label>
+                    <val id="sim-total-cost">0 냥</val>
+                </div>
+                <div class="sim-summary-item">
+                    <label>내용물 총 가치</label>
+                    <val id="sim-total-value">0 냥</val>
+                </div>
+                <div class="sim-summary-item">
+                    <label>최종 손익 금액</label>
+                    <val id="sim-net-profit">0 냥</val>
+                </div>
+            </div>
+
+            <!-- 직전 개봉 결과 메시지 로그 -->
+            <div class="sim-log-box" id="sim-log-box">
+                <div style="color: #a0aec0; text-align: center; padding: 10px;">상자를 개봉하면 최근 개봉 내역이 여기에 표시됩니다.</div>
+            </div>
+
+            <!-- 누적 획득 결과물 목록 (비싼 순 + 확률 낮은 순) -->
+            <div class="sim-result-table-wrapper">
+                <table class="sim-result-table">
+                    <thead>
+                        <tr>
+                            <th>획득 아이템명</th>
+                            <th>개당 단가</th>
+                            <th>획득 수량</th>
+                            <th>총 가치합</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sim-cumulative-tbody">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #a0aec0; padding: 15px;">개봉된 누적 아이템이 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="result-card">
             <div class="result-box">
                 <div class="result-title">상자 1개 적정 가격 (전체 기대값)</div>
@@ -246,18 +492,34 @@ const defaultItems = [
     { name: "대위덕명왕의 가락지", prob: 0.00009, price: 120 },
     { name: "항삼세명왕의 가락지", prob: 0.00009, price: 120 },
     { name: "북두칠성 각성 다문천왕의 관(개양)", prob: 0.00008, price: 70 },
-    { name: "북두칠성 각성 다문천왕의 예복(개양)", prob: 0.00008, price: 170 },
     { name: "북두칠성 각성 증장천왕의 관(개양)", prob: 0.00008, price: 70 },
+    { name: "북두칠성 각성 다문천왕의 예복(개양)", prob: 0.00008, price: 170 },
     { name: "북두칠성 각성 증장천왕의 갑옷(개양)", prob: 0.00008, price: 170 },
     { name: "각성 다문천왕의 반지", prob: 0.00006, price: 750 },
     { name: "각성 증장천왕의 반지", prob: 0.00006, price: 750 }
 ];
 
-// 작업 및 연산용 객체 배열 깊은 복사
 let items = JSON.parse(JSON.stringify(defaultItems));
 let hideZeroPrice = false;
 
-// 로컬스토리지에 저장된 가격이 있다면 로드
+// 시뮬레이터 통계 및 누적 데이터
+let simTotalOpened = 0;
+let simTotalValueInEok = 0;
+let simObtainedCounts = {}; // { 아이템명: 획득수량 }
+let lastBatchData = null;
+let lastBatchCount = 0;
+
+// 누적 확률 테이블
+let cumulativeProbs = [];
+function updateCumulativeProbs() {
+    cumulativeProbs = [];
+    let currentSum = 0;
+    items.forEach((item, index) => {
+        currentSum += item.prob;
+        cumulativeProbs.push({ index, cumulative: currentSum, name: item.name });
+    });
+}
+
 function loadSavedPrices() {
     const saved = localStorage.getItem('chulhee_box_prices');
     if (saved) {
@@ -274,7 +536,6 @@ function loadSavedPrices() {
     }
 }
 
-// 현재 입력된 가격 로컬스토리지에 저장
 function saveCustomPrices() {
     const priceMap = {};
     items.forEach(item => {
@@ -284,11 +545,11 @@ function saveCustomPrices() {
     alert('현재 설정된 가격이 저장되었습니다.');
 }
 
-// 기본 가격으로 초기화 및 저장된 데이터 삭제
 function resetToDefaultPrices() {
     if (confirm('기본 가격으로 세팅하고 저장된 가격 데이터를 삭제하시겠습니까?')) {
         localStorage.removeItem('chulhee_box_prices');
         items = JSON.parse(JSON.stringify(defaultItems));
+        updateCumulativeProbs();
         renderTable();
         calculate();
         updateAllRowVisibility();
@@ -300,16 +561,191 @@ function closeBoxModal() {
     window.close();
 }
 
-function formatMoney(valueInEok) {
-    const totalEok = valueInEok;
-    const eok = Math.floor(totalEok);
-    const man = Math.round((totalEok - eok) * 10000);
+function formatMoney(valueInEok, showSign = false) {
+    const isNegative = valueInEok < 0;
+    const absValue = Math.abs(valueInEok);
+    
+    const eok = Math.floor(absValue);
+    const man = Math.round((absValue - eok) * 10000);
     
     let result = [];
     if (eok > 0) result.push(`${eok}억`);
     if (man > 0) result.push(`${man.toLocaleString()}만`);
-    if (result.length === 0) return "0 냥";
-    return result.join(' ') + " 냥";
+    
+    let formattedText = result.length === 0 ? "0 냥" : result.join(' ') + " 냥";
+    
+    if (isNegative) {
+        return `- ${formattedText}`;
+    } else if (showSign && valueInEok > 0) {
+        return `+ ${formattedText}`;
+    }
+    return formattedText;
+}
+
+// 🎰 시뮬레이터 접기 / 열기 토글
+function toggleSimulator() {
+    const simCard = document.getElementById('sim-card');
+    const toggleBtn = document.querySelector('.btn-toggle-sim');
+    
+    if (simCard.classList.contains('active')) {
+        simCard.classList.remove('active');
+        toggleBtn.innerText = '🎰 가상 상자 까기 시뮬레이터 열기';
+    } else {
+        simCard.classList.add('active');
+        toggleBtn.innerText = '🎰 가상 상자 까기 시뮬레이터 닫기';
+    }
+}
+
+// 🎰 상자 개봉 함수
+function openBoxes(count) {
+    let obtainedInThisBatch = {};
+
+    for (let i = 0; i < count; i++) {
+        const rand = Math.random();
+        let selectedItem = items[items.length - 1];
+
+        for (let target of cumulativeProbs) {
+            if (rand <= target.cumulative) {
+                selectedItem = items[target.index];
+                break;
+            }
+        }
+
+        // 직전 획득 수량 계산
+        obtainedInThisBatch[selectedItem.name] = (obtainedInThisBatch[selectedItem.name] || 0) + 1;
+        
+        // 누적 획득 수량 계산
+        simObtainedCounts[selectedItem.name] = (simObtainedCounts[selectedItem.name] || 0) + 1;
+
+        simTotalOpened++;
+        simTotalValueInEok += selectedItem.price;
+    }
+
+    lastBatchData = obtainedInThisBatch;
+    lastBatchCount = count;
+    updateSimUI();
+}
+
+// 시뮬레이터 UI 갱신 (손익 연산 & 결과물 정렬)
+function updateSimUI() {
+    const singleBuyPrice = parseFloat(document.getElementById('sim-box-buy-price').value) || 0;
+    const totalCost = simTotalOpened * singleBuyPrice;
+    const netProfit = simTotalValueInEok - totalCost;
+
+    document.getElementById('sim-total-count').innerText = `${simTotalOpened.toLocaleString()} 개`;
+    document.getElementById('sim-total-cost').innerText = formatMoney(totalCost);
+    document.getElementById('sim-total-value').innerText = formatMoney(simTotalValueInEok);
+    
+    // 손익 금액 엘리먼트 & 색상 설정
+    const profitEl = document.getElementById('sim-net-profit');
+    profitEl.innerText = formatMoney(netProfit, true);
+    profitEl.className = '';
+    
+    if (netProfit > 0) {
+        profitEl.classList.add('color-profit');
+    } else if (netProfit < 0) {
+        profitEl.classList.add('color-loss');
+    }
+
+    // 1. 최근 개봉 로그 출력
+    if (lastBatchData) {
+        const logBox = document.getElementById('sim-log-box');
+        let logHTML = `<div style="font-weight:bold; margin-bottom: 4px; color:#2b6cb0;">[ 직전 ${lastBatchCount}개 개봉 내역 ]</div>`;
+        
+        for (let [itemName, count] of Object.entries(lastBatchData)) {
+            const targetItem = items.find(i => i.name === itemName);
+            const isJackpot = targetItem && targetItem.prob < 0.001;
+            const jackpotClass = isJackpot ? 'sim-log-jackpot' : '';
+            const jackpotIcon = isJackpot ? '🎉 ' : '';
+
+            logHTML += `
+                <div class="sim-log-item ${jackpotClass}">
+                    <span>${jackpotIcon}${itemName}</span>
+                    <span>x${count}개 (${formatMoney((targetItem ? targetItem.price : 0) * count)})</span>
+                </div>
+            `;
+        }
+        
+        logBox.innerHTML = logHTML;
+        logBox.scrollTop = 0;
+    }
+
+    // 2. 누적 획득 결과 테이블 출력 (정렬 규칙 적용)
+    renderCumulativeTable();
+}
+
+// 누적 결과물 정렬 및 출력 함수
+function renderCumulativeTable() {
+    const tbody = document.getElementById('sim-cumulative-tbody');
+    
+    const obtainedList = Object.keys(simObtainedCounts).map(itemName => {
+        const itemObj = items.find(i => i.name === itemName) || { price: 0, prob: 1 };
+        return {
+            name: itemName,
+            count: simObtainedCounts[itemName],
+            price: itemObj.price,
+            prob: itemObj.prob,
+            totalValue: itemObj.price * simObtainedCounts[itemName]
+        };
+    });
+
+    if (obtainedList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #a0aec0; padding: 15px;">개봉된 누적 아이템이 없습니다.</td></tr>`;
+        return;
+    }
+
+    // 🌟 요구사항 정렬 로직: 
+    // 1. 가격(단가) 비싼 순 (내림차순)
+    // 2. 가격이 같으면 확률 낮은 순 (오름차순)
+    obtainedList.sort((a, b) => {
+        if (b.price !== a.price) {
+            return b.price - a.price; // 가격 높은 순
+        }
+        return a.prob - b.prob;     // 확률 낮을수록 위로
+    });
+
+    let html = '';
+    obtainedList.forEach(item => {
+        const isJackpot = item.prob < 0.001;
+        const rowClass = isJackpot ? 'jackpot-row' : '';
+        const jackpotIcon = isJackpot ? '✨ ' : '';
+
+        html += `
+            <tr class="${rowClass}">
+                <td>${jackpotIcon}${item.name}</td>
+                <td>${formatMoney(item.price)}</td>
+                <td><strong>${item.count.toLocaleString()} 개</strong></td>
+                <td>${formatMoney(item.totalValue)}</td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
+}
+
+function updateSimUIOnly() {
+    if (simTotalOpened > 0) {
+        updateSimUI();
+    }
+}
+
+function resetSimData() {
+    simTotalOpened = 0;
+    simTotalValueInEok = 0;
+    simObtainedCounts = {};
+    lastBatchData = null;
+    lastBatchCount = 0;
+    
+    document.getElementById('sim-total-count').innerText = '0 개';
+    document.getElementById('sim-total-cost').innerText = '0 냥';
+    document.getElementById('sim-total-value').innerText = '0 냥';
+    
+    const profitEl = document.getElementById('sim-net-profit');
+    profitEl.innerText = '0 냥';
+    profitEl.className = '';
+    
+    document.getElementById('sim-log-box').innerHTML = '<div style="color: #a0aec0; text-align: center; padding: 10px;">상자를 개봉하면 최근 개봉 내역이 여기에 표시됩니다.</div>';
+    document.getElementById('sim-cumulative-tbody').innerHTML = '<tr><td colspan="4" style="text-align: center; color: #a0aec0; padding: 15px;">개봉된 누적 아이템이 없습니다.</td></tr>';
 }
 
 function renderTable() {
@@ -354,6 +790,7 @@ function renderTable() {
             items[idx].price = parseFloat(e.target.value) || 0;
             calculate();
             updateRowVisibility(idx);
+            if (simTotalOpened > 0) updateSimUI();
         });
 
         input.addEventListener('dblclick', (e) => {
@@ -384,12 +821,6 @@ function calculate() {
 
     document.getElementById('total-expected').innerText = formatMoney(totalExpectedInEok);
     document.getElementById('realistic-expected').innerText = formatMoney(realisticExpectedInEok);
-
-    if (window.commonData && window.commonData.values) {
-        window.commonData.values['철희상자'] = Math.round((totalExpectedInEok) * 100) / 100;
-        if (typeof window.saveCommonData === 'function') window.saveCommonData();
-        if (typeof window.calculate === 'function') window.calculate(false);
-    }
 }
 
 function updateAllRowVisibility() {
@@ -419,8 +850,9 @@ document.getElementById('box-modal').addEventListener('click', function(e) {
     if (e.target === this) closeBoxModal();
 });
 
-// 초기화 로직 수행
+// 초기화
 loadSavedPrices();
+updateCumulativeProbs();
 renderTable();
 calculate();
 </script>

@@ -1057,9 +1057,14 @@ function calculate(shouldRerenderComp = false) {
 
 window.onload = init;
 
-function openBoxCalculator() {
-  // 새 탭으로 별도 페이지 열기
-  window.open('box-modal.html', '_blank');
+async function openBoxCalculator() {
+  const response = await fetch('box-modal.html');
+  const htmlContent = await response.text();
+
+  const blob = new Blob([htmlContent], { type: 'text/html' });
+  const blobUrl = URL.createObjectURL(blob);
+
+  window.open(blobUrl, '_blank');
 }
 </script>
 </body>
