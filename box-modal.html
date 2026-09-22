@@ -188,12 +188,12 @@
         .color-profit { color: var(--profit-color) !important; }
         .color-loss { color: var(--loss-color) !important; }
 
-        /* 누적 획득 결과 테이블 스타일 */
+        /* 누적 획득 결과 테이블 스타일 (높이를 기존 250px에서 500px로 2배 확장) */
         .sim-result-table-wrapper {
             background-color: #ffffff;
             border: 1px solid #feebc8;
             border-radius: 8px;
-            max-height: 700px;
+            max-height: 500px;
             overflow-y: auto;
         }
 
@@ -364,7 +364,7 @@
                 </div>
             </div>
 
-            <!-- 누적 획득 결과물 목록 (비싼 순 + 확률 낮은 순) -->
+            <!-- 누적 획득 결과 목록 -->
             <div class="sim-result-table-wrapper">
                 <table class="sim-result-table">
                     <thead>
@@ -402,7 +402,9 @@
                 <thead>
                     <tr>
                         <th>아이템명</th>
-                        <th>확률</th>
+                        <th id="header-prob" class="clickable" title="클릭시 확률 오름차순/내림차순으로 정렬합니다">
+                            확률 <span id="prob-sort-icon">▼</span>
+                        </th>
                         <th title="해당 아이템을 통계적으로 1개 얻기 위해 필요한 상자 수">필요상자 수</th>
                         <th id="header-price" class="clickable" title="클릭시 가격 0원 항목을 숨기거나 표시합니다">
                             가격 입력
@@ -476,6 +478,7 @@ const defaultItems = [
 
 let items = JSON.parse(JSON.stringify(defaultItems));
 let hideZeroPrice = false;
+let probSortDesc = false; // true: 내림차순(큰 확률 우선), false: 오름차순(작은 확률 우선)
 
 // 시뮬레이터 통계 및 누적 데이터
 let simTotalOpened = 0;
@@ -522,6 +525,7 @@ function resetToDefaultPrices() {
     if (confirm('기본 가격으로 세팅하고 저장된 가격 데이터를 삭제하시겠습니까?')) {
         localStorage.removeItem('chulhee_box_prices');
         items = JSON.parse(JSON.stringify(defaultItems));
+        sortItemsByProb();
         updateCumulativeProbs();
         renderTable();
         calculate();
@@ -688,6 +692,10 @@ function resetSimData() {
     document.getElementById('sim-cumulative-tbody').innerHTML = '<tr><td colspan="4" style="text-align: center; color: #a0aec0; padding: 15px;">개봉된 누적 아이템이 없습니다.</td></tr>';
 }
 
+function sortItemsByProb() {
+    items.sort((a, b) => probSortDesc ? b.prob - a.prob : a.prob - b.prob);
+}
+
 function renderTable() {
     const tbody = document.getElementById('item-table-body');
     tbody.innerHTML = '';
@@ -778,12 +786,33 @@ function updateRowVisibility(index) {
     }
 }
 
-document.getElementById('header-price').addEventListener('click', () => {
+function toggleHideZeroPrice() {
     hideZeroPrice = !hideZeroPrice;
     const btn = document.getElementById('btn-toggle-zero');
     btn.innerText = hideZeroPrice ? "🙈" : "👁️";
     btn.title = hideZeroPrice ? "0원 항목 표시하기" : "0원 항목 숨기기";
     updateAllRowVisibility();
+}
+
+// 확률 헤더 클릭 이벤트 (오름차순/내림차순 토글 정렬)
+document.getElementById('header-prob').addEventListener('click', () => {
+    probSortDesc = !probSortDesc;
+    document.getElementById('prob-sort-icon').innerText = probSortDesc ? "▼" : "▲";
+    sortItemsByProb();
+    updateCumulativeProbs();
+    renderTable();
+    calculate();
+    updateAllRowVisibility();
+});
+
+// 가격 입력 헤더 및 눈 아이콘 버튼 클릭 이벤트
+document.getElementById('header-price').addEventListener('click', () => {
+    toggleHideZeroPrice();
+});
+
+document.getElementById('btn-toggle-zero').addEventListener('click', (e) => {
+    e.stopPropagation(); // 헤더 중복 이벤트 발생 방지
+    toggleHideZeroPrice();
 });
 
 document.getElementById('box-modal').addEventListener('click', function(e) {
@@ -792,6 +821,7 @@ document.getElementById('box-modal').addEventListener('click', function(e) {
 
 // 초기화
 loadSavedPrices();
+sortItemsByProb();
 updateCumulativeProbs();
 renderTable();
 calculate();
