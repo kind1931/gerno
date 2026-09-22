@@ -80,7 +80,8 @@
 
     .btn:hover { opacity: 0.9; }
     .btn-save { background-color: var(--accent); }
-    .btn-reset { background-color: var(--danger); }
+    .btn-reset { background-color: #f97316; }
+    .btn-clear-all { background-color: var(--danger); }
     .btn-delete { background-color: #64748b; }
     .btn-toggle { background-color: #8b5cf6; }
 
@@ -324,15 +325,18 @@
   <div class="header-area">
     <h1>거상 2026 추석 캐쉬 할인 구매 계산기</h1>
     <div class="btn-group">
+      <button class="btn" style="background-color: #059669;" onclick="openBoxCalculator()">🎁 상자 확률 정보</button>
       <button class="btn btn-toggle" onclick="toggleProfitMode()">👁️ 차익 계산 켜기/끄기</button>
       <button class="btn btn-reset" onclick="resetAll()">🔄 수량 초기화</button>
+      <button class="btn btn-clear-all" onclick="resetAllData()">💥 데이터 초기화</button>
     </div>
   </div>
   <div class="notice">
     ※ 이름을 입력 후 <b>💾 저장하기</b>를 누르면 설정이 기록되며, 이름을 비워두면 '임시저장 1' 형식으로 자동 저장됩니다.<br>
     ※ <b>📂 불러오기 목록</b>에서 항목을 선택하면 자동으로 해당 세팅이 로드됩니다.<br>
     ※ 상품 이름 옆의 <b>★ 별 아이콘</b>을 클릭하면 즐겨찾기로 상단에 고정되며, 브라우저에 자동 저장됩니다.<br>
-    ※ 상품 선택 테이블의 <b>[수량] 헤더를 클릭</b>하면 수량이 0인 상품을 숨기거나 다시 표시할 수 있습니다.
+    ※ 상품 선택 테이블의 <b>[수량] 헤더를 클릭</b>하면 수량이 0인 상품을 숨기거나 다시 표시할 수 있습니다.<br>
+    ※ <b>💥 데이터 초기화</b> 버튼을 누르면 캐쉬 비율, 재화가치, 저장 목록, 즐겨찾기 등 모든 데이터가 삭제되고 초기 상태로 되돌아갑니다.
   </div>
 
   <!-- 저장/불러오기 관리 패널 -->
@@ -735,6 +739,31 @@ function resetAll() {
   showToast('수량이 초기화되었습니다.');
 }
 
+// 모든 데이터 초기화 (비율, 재화가치, 저장 목록, 즐겨찾기 완전 삭제)
+function resetAllData() {
+  if (confirm('캐쉬 비율, 재화가치, 저장 목록, 즐겨찾기 등 모든 데이터가 삭제됩니다.\n정말로 전체 초기화하시겠습니까?')) {
+    // 1. 계산기 관련 로컬스토리지 모든 키 삭제
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(STORAGE_PREFIX) || key === COMMON_STORAGE_KEY || key === FAVORITES_STORAGE_KEY) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+
+    // 2. 변수 및 상태 초기화
+    commonData = { rate: 3.2, values: {} };
+    favorites = new Set();
+    currentLoadedSlot = '';
+    previousSelectValue = '';
+    isDirty = false;
+
+    // 3. 새로고침으로 깔끔하게 초기 상태 반영
+    location.reload();
+  }
+}
+
 function getQty(id) {
   const el = document.getElementById(`qty-${id}`);
   if (!el) return 0;
@@ -1027,7 +1056,11 @@ function calculate(shouldRerenderComp = false) {
 }
 
 window.onload = init;
-</script>
 
+function openBoxCalculator() {
+  // 새 탭으로 별도 페이지 열기
+  window.open('box-modal.html', '_blank');
+}
+</script>
 </body>
 </html>

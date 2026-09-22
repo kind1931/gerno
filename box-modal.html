@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>철희상자 적정가 계산기</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --primary-color: #2b6cb0;
+            --border-color: #e2e8f0;
+            --text-color: #2d3748;
+            --untradeable-color: #e53e3e;
+        }
+
+        .box-modal-overlay {
+            display: flex;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .box-modal-container {
+            background-color: var(--card-bg);
+            width: 90%;
+            max-width: 950px;
+            max-height: 85vh;
+            border-radius: 12px;
+            padding: 24px;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-color);
+            position: relative;
+        }
+
+        .modal-header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-header-area h2 {
+            margin: 0;
+            color: #1a202c;
+            font-size: 1.4rem;
+        }
+
+        .header-btn-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .result-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border: 2px solid var(--primary-color);
+        }
+
+        .result-box {
+            text-align: center;
+            padding: 10px;
+            background-color: #ebf8ff;
+            border-radius: 8px;
+        }
+
+        .result-box.sub { background-color: #f7fafc; cursor: help; }
+        .result-title { font-size: 0.85rem; color: #4a5568; margin-bottom: 4px; }
+        .result-subtitle { font-size: 0.75rem; color: #718096; margin-bottom: 2px; }
+        .result-value { font-size: 1.3rem; font-weight: bold; color: var(--primary-color); }
+
+        .table-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+        th { background-color: #edf2f7; font-weight: 600; color: #4a5568; }
+        th.clickable { cursor: pointer; user-select: none; }
+        th.clickable:hover { background-color: #e2e8f0; }
+
+        .text-untradeable { color: var(--untradeable-color) !important; font-weight: 600; }
+
+        .input-price {
+            width: 85px;
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: right;
+            font-size: 0.9rem;
+        }
+
+        .input-price[readonly] { background-color: #f7fafc; color: #718096; cursor: pointer; }
+        .row-hidden { display: none !important; }
+        
+        .toggle-btn {
+            font-size: 0.95rem;
+            background-color: #cbd5e0;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-left: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toggle-btn:hover { background-color: #a0aec0; }
+
+        .btn-action {
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-save { background-color: #3182ce; color: white; }
+        .btn-save:hover { background-color: #2b6cb0; }
+        .btn-reset { background-color: #e53e3e; color: white; }
+        .btn-reset:hover { background-color: #c53030; }
+        .btn-close { background-color: #64748b; color: white; }
+        .btn-close:hover { background-color: #475569; }
+    </style>
+</head>
+<body style="margin: 0; background-color: var(--bg-color);">
+
+<div id="box-modal" class="box-modal-overlay">
+    <div class="box-modal-container">
+        <div class="modal-header-area">
+            <h2>🎁 철희상자 적정가 계산기</h2>
+            <div class="header-btn-group">
+                <button class="btn-action btn-save" onclick="saveCustomPrices()">가격 저장</button>
+                <button class="btn-action btn-reset" onclick="resetToDefaultPrices()">기본가격 세팅</button>
+                <button class="btn-action btn-close" onclick="closeBoxModal()">닫기</button>
+            </div>
+        </div>
+
+        <div class="result-card">
+            <div class="result-box">
+                <div class="result-title">상자 1개 적정 가격 (전체 기대값)</div>
+                <div class="result-subtitle">모든 아이템 포함</div>
+                <div class="result-value" id="total-expected">0 냥</div>
+            </div>
+            <div class="result-box sub" id="realistic-card" title="확률 0.1% 미만의 대박 아이템(사천왕 반지, 명왕 장비, 각성 천왕 장비 등)을 제외하고 계산한 실질 기대값입니다.">
+                <div class="result-title">💡 체감 적정가 (대박 제외)</div>
+                <div class="result-subtitle" id="realistic-desc">확률 0.1% 미만 아이템 제외</div>
+                <div class="result-value" id="realistic-expected" style="color: #4a5568;">0 냥</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>아이템명</th>
+                        <th>확률</th>
+                        <th title="해당 아이템을 통계적으로 1개 얻기 위해 필요한 상자 수">필요상자 수</th>
+                        <th id="header-price" class="clickable" title="클릭시 가격 0원 항목을 숨기거나 표시합니다">
+                            가격 입력
+                            <button class="toggle-btn" id="btn-toggle-zero" title="0원 항목 숨기기/보이기">👁️</button>
+                        </th>
+                        <th>기대 가치</th>
+                    </tr>
+                </thead>
+                <tbody id="item-table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// 초기 고정 기본 데이터
+const defaultItems = [
+    { name: "불사신부(거래불가)", prob: 0.09000, price: 0, untradeable: true },
+    { name: "다다익선-1일(거래불가)", prob: 0.08800, price: 0, untradeable: true },
+    { name: "축지법-1일(거래불가)", prob: 0.08800, price: 0, untradeable: true },
+    { name: "일취월장-1일(거래불가)", prob: 0.08800, price: 0, untradeable: true },
+    { name: "자아도취-1일(거래불가)", prob: 0.08800, price: 0, untradeable: true },
+    { name: "변신주문서(도령 최무선)-1일(거래불가)", prob: 0.08000, price: 0, untradeable: true },
+    { name: "변신주문서(검성 보쿠텐)-1일(거래불가)", prob: 0.08000, price: 0, untradeable: true },
+    { name: "꼬망(천옥 진인수)-1일(거래불가)", prob: 0.06800, price: 0, untradeable: true },
+    { name: "꼬망(천옥 성록수)-1일(거래불가)", prob: 0.06800, price: 0, untradeable: true },
+    { name: "병법24편-1일(거래불가)", prob: 0.03500, price: 0, untradeable: true },
+    { name: "정령교감시약(소형)(거래불가)", prob: 0.03000, price: 0, untradeable: true },
+    { name: "신선단약-7일(거래불가)", prob: 0.02300, price: 0, untradeable: true },
+    { name: "다다익선-7일(거래불가)", prob: 0.02200, price: 0, untradeable: true },
+    { name: "도발부-7일(거래불가)", prob: 0.02200, price: 0, untradeable: true },
+    { name: "고급소탕령초기화주문서(거래불가)", prob: 0.02200, price: 0, untradeable: true },
+    { name: "일석이조-5일(거래불가)", prob: 0.02000, price: 0, untradeable: true },
+    { name: "두신의의상(200레벨)", prob: 0.01200, price: 0.8 },
+    { name: "원공의의상(200레벨)", prob: 0.01200, price: 0.8 },
+    { name: "기의의상(200레벨)", prob: 0.01200, price: 0.8 },
+    { name: "누에의의상(200레벨)", prob: 0.01200, price: 0.8 },
+    { name: "전설장수 강화보조제(무기)", prob: 0.01000, price: 0.06 },
+    { name: "전설장수 강화보조제(방어구)", prob: 0.01000, price: 0.15 },
+    { name: "초급몬스터꾸러미", prob: 0.00600, price: 1.6 },
+    { name: "중급몬스터꾸러미", prob: 0.00300, price: 3 },
+    { name: "백호의의상(200레벨)", prob: 0.00100, price: 7.5 },
+    { name: "주작의의상(200레벨)", prob: 0.00100, price: 7.5 },
+    { name: "현무의의상(200레벨)", prob: 0.00100, price: 7.5 },
+    { name: "청룡의의상(200레벨)", prob: 0.00100, price: 7.5 },
+    { name: "기생가발(귀속된)", prob: 0.00080, price: 0, untradeable: true },
+    { name: "기생복장(귀속된)", prob: 0.00080, price: 0, untradeable: true },
+    { name: "홍유모자(귀속된)", prob: 0.00080, price: 0, untradeable: true },
+    { name: "홍유복장(귀속된)", prob: 0.00080, price: 0, untradeable: true },
+    { name: "엘리스가발(귀속된)", prob: 0.00080, price: 0, untradeable: true },
+    { name: "엘리스복장(귀속된)", prob: 0.00080, price: 0, untradeable: true },
+    { name: "고급몬스터꾸러미", prob: 0.00070, price: 9 },
+    { name: "광목천왕지환", prob: 0.00012, price: 50 },
+    { name: "다문천왕의 가락지", prob: 0.00012, price: 50 },
+    { name: "증장천왕의 반지", prob: 0.00012, price: 60 },
+    { name: "지국천왕의 반지", prob: 0.00012, price: 50 },
+    { name: "북두칠성 항삼세명왕의 투구(천추)", prob: 0.00010, price: 85 },
+    { name: "북두칠성 항삼세명왕의 갑옷(천추)", prob: 0.00010, price: 60 },
+    { name: "북두칠성 대위덕명왕의 머리띠(천기)", prob: 0.00010, price: 75 },
+    { name: "북두칠성 대위덕명왕의 갑옷(천기)", prob: 0.00010, price: 50 },
+    { name: "대위덕명왕의 가락지", prob: 0.00009, price: 120 },
+    { name: "항삼세명왕의 가락지", prob: 0.00009, price: 120 },
+    { name: "북두칠성 각성 다문천왕의 관(개양)", prob: 0.00008, price: 70 },
+    { name: "북두칠성 각성 다문천왕의 예복(개양)", prob: 0.00008, price: 170 },
+    { name: "북두칠성 각성 증장천왕의 관(개양)", prob: 0.00008, price: 70 },
+    { name: "북두칠성 각성 증장천왕의 갑옷(개양)", prob: 0.00008, price: 170 },
+    { name: "각성 다문천왕의 반지", prob: 0.00006, price: 750 },
+    { name: "각성 증장천왕의 반지", prob: 0.00006, price: 750 }
+];
+
+// 작업 및 연산용 객체 배열 깊은 복사
+let items = JSON.parse(JSON.stringify(defaultItems));
+let hideZeroPrice = false;
+
+// 로컬스토리지에 저장된 가격이 있다면 로드
+function loadSavedPrices() {
+    const saved = localStorage.getItem('chulhee_box_prices');
+    if (saved) {
+        try {
+            const savedPrices = JSON.parse(saved);
+            items.forEach(item => {
+                if (savedPrices[item.name] !== undefined) {
+                    item.price = savedPrices[item.name];
+                }
+            });
+        } catch (e) {
+            console.error("저장된 가격 로드 실패:", e);
+        }
+    }
+}
+
+// 현재 입력된 가격 로컬스토리지에 저장
+function saveCustomPrices() {
+    const priceMap = {};
+    items.forEach(item => {
+        priceMap[item.name] = item.price;
+    });
+    localStorage.setItem('chulhee_box_prices', JSON.stringify(priceMap));
+    alert('현재 설정된 가격이 저장되었습니다.');
+}
+
+// 기본 가격으로 초기화 및 저장된 데이터 삭제
+function resetToDefaultPrices() {
+    if (confirm('기본 가격으로 세팅하고 저장된 가격 데이터를 삭제하시겠습니까?')) {
+        localStorage.removeItem('chulhee_box_prices');
+        items = JSON.parse(JSON.stringify(defaultItems));
+        renderTable();
+        calculate();
+        updateAllRowVisibility();
+        alert('기본 가격으로 세팅되었으며, 저장 데이터가 삭제되었습니다.');
+    }
+}
+
+function closeBoxModal() {
+    const modal = document.getElementById('box-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function formatMoney(valueInEok) {
+    const totalEok = valueInEok;
+    const eok = Math.floor(totalEok);
+    const man = Math.round((totalEok - eok) * 10000);
+    
+    let result = [];
+    if (eok > 0) result.push(`${eok}억`);
+    if (man > 0) result.push(`${man.toLocaleString()}만`);
+    if (result.length === 0) return "0 냥";
+    return result.join(' ') + " 냥";
+}
+
+function renderTable() {
+    const tbody = document.getElementById('item-table-body');
+    tbody.innerHTML = '';
+
+    items.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.id = `row-${index}`;
+        
+        const probPercent = (item.prob * 100).toFixed(4) + '%';
+        const expectedBoxes = Math.round(1 / item.prob).toLocaleString() + '개';
+
+        const isUntradeable = item.untradeable || item.name.includes('거래불가') || item.name.includes('귀속');
+        const textClass = isUntradeable ? 'text-untradeable' : '';
+        const readonlyAttr = isUntradeable ? 'readonly' : '';
+        const titleText = isUntradeable ? '더블클릭 시 가격 수정 가능' : '';
+
+        tr.innerHTML = `
+            <td><strong class="${textClass}">${item.name}</strong></td>
+            <td>${probPercent}</td>
+            <td style="color: #4a5568; font-weight: 500;">약 ${expectedBoxes}</td>
+            <td>
+                <input type="number" 
+                       class="input-price ${textClass}" 
+                       value="${item.price}" 
+                       step="0.01" 
+                       min="0" 
+                       ${readonlyAttr}
+                       title="${titleText}"
+                       data-index="${index}">
+                <span class="unit">억</span>
+            </td>
+            <td id="expected-${index}">0 냥</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll('.input-price').forEach(input => {
+        input.addEventListener('input', (e) => {
+            const idx = e.target.dataset.index;
+            items[idx].price = parseFloat(e.target.value) || 0;
+            calculate();
+            updateRowVisibility(idx);
+        });
+
+        input.addEventListener('dblclick', (e) => {
+            if (e.target.hasAttribute('readonly')) {
+                e.target.removeAttribute('readonly');
+                e.target.style.backgroundColor = '#ffffff';
+                e.target.select();
+            }
+        });
+    });
+}
+
+function calculate() {
+    let totalExpectedInEok = 0;
+    let realisticExpectedInEok = 0;
+
+    items.forEach((item, index) => {
+        const expectedValue = item.prob * item.price;
+        totalExpectedInEok += expectedValue;
+
+        if (item.prob >= 0.001) {
+            realisticExpectedInEok += expectedValue;
+        }
+
+        const cell = document.getElementById(`expected-${index}`);
+        if (cell) cell.innerText = formatMoney(expectedValue);
+    });
+
+    document.getElementById('total-expected').innerText = formatMoney(totalExpectedInEok);
+    document.getElementById('realistic-expected').innerText = formatMoney(realisticExpectedInEok);
+
+    if (window.commonData && window.commonData.values) {
+        window.commonData.values['철희상자'] = Math.round((totalExpectedInEok) * 100) / 100;
+        if (typeof window.saveCommonData === 'function') window.saveCommonData();
+        if (typeof window.calculate === 'function') window.calculate(false);
+    }
+}
+
+function updateAllRowVisibility() {
+    items.forEach((item, index) => updateRowVisibility(index));
+}
+
+function updateRowVisibility(index) {
+    const row = document.getElementById(`row-${index}`);
+    if (!row) return;
+
+    if (hideZeroPrice && items[index].price === 0) {
+        row.classList.add('row-hidden');
+    } else {
+        row.classList.remove('row-hidden');
+    }
+}
+
+document.getElementById('header-price').addEventListener('click', () => {
+    hideZeroPrice = !hideZeroPrice;
+    const btn = document.getElementById('btn-toggle-zero');
+    btn.innerText = hideZeroPrice ? "🙈" : "👁️";
+    btn.title = hideZeroPrice ? "0원 항목 표시하기" : "0원 항목 숨기기";
+    updateAllRowVisibility();
+});
+
+document.getElementById('box-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeBoxModal();
+});
+
+// 초기화 로직 수행
+loadSavedPrices();
+renderTable();
+calculate();
+</script>
+</body>
+</html>
