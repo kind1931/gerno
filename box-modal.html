@@ -188,32 +188,12 @@
         .color-profit { color: var(--profit-color) !important; }
         .color-loss { color: var(--loss-color) !important; }
 
-        .sim-log-box {
-            background-color: #ffffff;
-            border: 1px solid #feebc8;
-            border-radius: 8px;
-            padding: 10px 14px;
-            max-height: 120px;
-            overflow-y: auto;
-            font-size: 0.85rem;
-            margin-bottom: 12px;
-        }
-
-        .sim-log-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 3px 0;
-            border-bottom: 1px dashed #edf2f7;
-        }
-        .sim-log-item:last-child { border-bottom: none; }
-        .sim-log-jackpot { color: #dd6b20; font-weight: bold; }
-
         /* 누적 획득 결과 테이블 스타일 */
         .sim-result-table-wrapper {
             background-color: #ffffff;
             border: 1px solid #feebc8;
             border-radius: 8px;
-            max-height: 250px;
+            max-height: 700px;
             overflow-y: auto;
         }
 
@@ -384,11 +364,6 @@
                 </div>
             </div>
 
-            <!-- 직전 개봉 결과 메시지 로그 -->
-            <div class="sim-log-box" id="sim-log-box">
-                <div style="color: #a0aec0; text-align: center; padding: 10px;">상자를 개봉하면 최근 개봉 내역이 여기에 표시됩니다.</div>
-            </div>
-
             <!-- 누적 획득 결과물 목록 (비싼 순 + 확률 낮은 순) -->
             <div class="sim-result-table-wrapper">
                 <table class="sim-result-table">
@@ -506,8 +481,6 @@ let hideZeroPrice = false;
 let simTotalOpened = 0;
 let simTotalValueInEok = 0;
 let simObtainedCounts = {}; // { 아이템명: 획득수량 }
-let lastBatchData = null;
-let lastBatchCount = 0;
 
 // 누적 확률 테이블
 let cumulativeProbs = [];
@@ -598,8 +571,6 @@ function toggleSimulator() {
 
 // 🎰 상자 개봉 함수
 function openBoxes(count) {
-    let obtainedInThisBatch = {};
-
     for (let i = 0; i < count; i++) {
         const rand = Math.random();
         let selectedItem = items[items.length - 1];
@@ -610,9 +581,6 @@ function openBoxes(count) {
                 break;
             }
         }
-
-        // 직전 획득 수량 계산
-        obtainedInThisBatch[selectedItem.name] = (obtainedInThisBatch[selectedItem.name] || 0) + 1;
         
         // 누적 획득 수량 계산
         simObtainedCounts[selectedItem.name] = (simObtainedCounts[selectedItem.name] || 0) + 1;
@@ -621,12 +589,10 @@ function openBoxes(count) {
         simTotalValueInEok += selectedItem.price;
     }
 
-    lastBatchData = obtainedInThisBatch;
-    lastBatchCount = count;
     updateSimUI();
 }
 
-// 시뮬레이터 UI 갱신 (손익 연산 & 결과물 정렬)
+// 시뮬레이터 UI 갱신
 function updateSimUI() {
     const singleBuyPrice = parseFloat(document.getElementById('sim-box-buy-price').value) || 0;
     const totalCost = simTotalOpened * singleBuyPrice;
@@ -647,30 +613,7 @@ function updateSimUI() {
         profitEl.classList.add('color-loss');
     }
 
-    // 1. 최근 개봉 로그 출력
-    if (lastBatchData) {
-        const logBox = document.getElementById('sim-log-box');
-        let logHTML = `<div style="font-weight:bold; margin-bottom: 4px; color:#2b6cb0;">[ 직전 ${lastBatchCount}개 개봉 내역 ]</div>`;
-        
-        for (let [itemName, count] of Object.entries(lastBatchData)) {
-            const targetItem = items.find(i => i.name === itemName);
-            const isJackpot = targetItem && targetItem.prob < 0.001;
-            const jackpotClass = isJackpot ? 'sim-log-jackpot' : '';
-            const jackpotIcon = isJackpot ? '🎉 ' : '';
-
-            logHTML += `
-                <div class="sim-log-item ${jackpotClass}">
-                    <span>${jackpotIcon}${itemName}</span>
-                    <span>x${count}개 (${formatMoney((targetItem ? targetItem.price : 0) * count)})</span>
-                </div>
-            `;
-        }
-        
-        logBox.innerHTML = logHTML;
-        logBox.scrollTop = 0;
-    }
-
-    // 2. 누적 획득 결과 테이블 출력 (정렬 규칙 적용)
+    // 누적 획득 결과 테이블 출력
     renderCumulativeTable();
 }
 
@@ -694,14 +637,14 @@ function renderCumulativeTable() {
         return;
     }
 
-    // 🌟 요구사항 정렬 로직: 
+    // 정렬 로직: 
     // 1. 가격(단가) 비싼 순 (내림차순)
     // 2. 가격이 같으면 확률 낮은 순 (오름차순)
     obtainedList.sort((a, b) => {
         if (b.price !== a.price) {
-            return b.price - a.price; // 가격 높은 순
+            return b.price - a.price;
         }
-        return a.prob - b.prob;     // 확률 낮을수록 위로
+        return a.prob - b.prob;
     });
 
     let html = '';
@@ -733,8 +676,6 @@ function resetSimData() {
     simTotalOpened = 0;
     simTotalValueInEok = 0;
     simObtainedCounts = {};
-    lastBatchData = null;
-    lastBatchCount = 0;
     
     document.getElementById('sim-total-count').innerText = '0 개';
     document.getElementById('sim-total-cost').innerText = '0 냥';
@@ -744,7 +685,6 @@ function resetSimData() {
     profitEl.innerText = '0 냥';
     profitEl.className = '';
     
-    document.getElementById('sim-log-box').innerHTML = '<div style="color: #a0aec0; text-align: center; padding: 10px;">상자를 개봉하면 최근 개봉 내역이 여기에 표시됩니다.</div>';
     document.getElementById('sim-cumulative-tbody').innerHTML = '<tr><td colspan="4" style="text-align: center; color: #a0aec0; padding: 15px;">개봉된 누적 아이템이 없습니다.</td></tr>';
 }
 
