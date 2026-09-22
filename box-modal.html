@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XT7WN5EW7B"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-XT7WN5EW7B');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>철희상자 적정가 계산기</title>
@@ -149,7 +158,7 @@
             <h2>🎁 철희상자 적정가 계산기</h2>
             <div class="header-btn-group">
                 <button class="btn-action btn-save" onclick="saveCustomPrices()">가격 저장</button>
-                <button class="btn-action btn-reset" onclick="resetToDefaultPrices()">기본가격 세팅</button>
+                <button class="btn-action btn-reset" onclick="resetToDefaultPrices()">가격 삭제</button>
                 <button class="btn-action btn-close" onclick="closeBoxModal()">닫기</button>
             </div>
         </div>
