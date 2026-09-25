@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XT7WN5EW7B"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-XT7WN5EW7B');
+  </script>
+  <!-- 공통 네비게이션 스크립트 불러오기 -->
+  <script src="/nav.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>거상 2026 추석 캐쉬 할인 구매 계산기</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --primary: #2b3a4a;
+      --accent: #2563eb;
+      --border: #cbd5e1;
+      --light-blue: #e0f2fe;
+      --highlight: #dbeafe;
+      --danger: #ef4444;
+      --success: #10b981;
+      --star-active: #f59e0b;
+      --star-inactive: #cbd5e1;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1380px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      position: relative;
+    }
+
+    .header-area {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: var(--primary);
+      margin: 0;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      border: none;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s, opacity 0.2s;
+      color: white;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn-save { background-color: var(--accent); }
+    .btn-reset { background-color: #f97316; }
+    .btn-clear-all { background-color: var(--danger); }
+    .btn-delete { background-color: #64748b; }
+    .btn-toggle { background-color: #8b5cf6; }
+
+    .notice {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Save Management Area */
+    .save-management {
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .save-input-group, .load-input-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .save-management label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #3730a3;
+      min-width: 80px;
+    }
+
+    .save-management input[type="text"], .save-management select {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+      min-width: 220px;
+    }
+
+    /* Top Summary Panel - Sticky 적용 */
+    .summary-panel {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      background: #ffffff;
+      padding: 16px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary-item label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .summary-item input {
+      padding: 8px 12px;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .summary-item .value {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      padding: 6px 0;
+    }
+
+    /* Main Grid Layout */
+    .grid-container {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      font-weight: 600;
+      color: #334155;
+      text-align: center;
+    }
+
+    th.clickable-header {
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s;
+    }
+    th.clickable-header:hover {
+      background-color: #e2e8f0;
+      color: var(--accent);
+    }
+
+    .number-col { text-align: right; }
+    .center-col { text-align: center; }
+
+    /* Star Favorite Icon Style */
+    .star-btn {
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 6px;
+      user-select: none;
+      color: var(--star-inactive);
+      transition: color 0.2s, transform 0.1s;
+      display: inline-block;
+    }
+    .star-btn:hover {
+      transform: scale(1.2);
+    }
+    .star-btn.active {
+      color: var(--star-active);
+    }
+
+    /* Product Name & Sub Description Style */
+    .product-cell {
+      display: flex;
+      align-items: center;
+    }
+    
+    .product-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-title {
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .product-comp {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+      font-weight: normal;
+    }
+
+    /* Input Style */
+    input[type="number"].qty-input,
+    input[type="number"].val-input {
+      width: 60px;
+      padding: 4px 6px;
+      text-align: center;
+      border: 1px solid #93c5fd;
+      background-color: var(--light-blue);
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    input[type="number"].qty-input:focus,
+    input[type="number"].val-input:focus {
+      outline: 2px solid var(--accent);
+      background-color: #fff;
+    }
+
+    tr.has-value {
+      background-color: var(--highlight);
+      font-weight: bold;
+    }
+
+    tr.hide-zero {
+      display: none !important;
+    }
+
+    /* Profit Text Colors */
+    .profit-positive { color: #059669; font-weight: bold; }
+    .profit-negative { color: #dc2626; font-weight: bold; }
+    .profit-zero { color: #6b7280; font-weight: bold; }
+
+    /* On/Off Toggle Classes */
+    .profit-mode-off .profit-element {
+      display: none !important;
+    }
+
+    /* Toast Notification */
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1000;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      font-size: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      opacity: 0;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="profit-mode-off">
+
+<div class="container">
+  <div class="header-area">
+    <h1>거상 2026 추석 캐쉬 할인 구매 계산기</h1>
+    <div class="btn-group">
+      <button class="btn" style="background-color: #059669;" onclick="openBoxCalculator()">🎁 상자 확률 정보</button>
+      <button class="btn btn-toggle" onclick="toggleProfitMode()">👁️ 차익 계산 켜기/끄기</button>
+      <button class="btn btn-reset" onclick="resetAll()">🔄 수량 초기화</button>
+    </div>
+  </div>
+  <div class="notice">
+    ※ 이름을 입력 후 <b>💾 저장하기</b>를 누르면 설정이 기록되며, 이름을 비워두면 '임시저장 1' 형식으로 자동 저장됩니다.<br>
+    ※ <b>📂 불러오기 목록</b>에서 항목을 선택하면 자동으로 해당 세팅이 로드됩니다.<br>
+    ※ 상품 이름 옆의 <b>★ 별 아이콘</b>을 클릭하면 즐겨찾기로 상단에 고정되며, 브라우저에 자동 저장됩니다.<br>
+    ※ 상품 선택 테이블의 <b>[수량] 헤더를 클릭</b>하면 수량이 0인 상품을 숨기거나 다시 표시할 수 있습니다.<br>
+    ※ <b>💥 데이터 초기화</b> 버튼을 누르면 캐쉬 비율, 재화가치, 저장 목록, 즐겨찾기 등 모든 데이터가 삭제되고 초기 상태로 되돌아갑니다.
+  </div>
+
+  <!-- 저장/불러오기 관리 패널 -->
+  <div class="save-management">
+    <div class="save-input-group">
+      <label for="save-name">💾 저장하기:</label>
+      <input type="text" id="save-name" placeholder="저장 이름 (미입력 시 자동지정)">
+      <button class="btn btn-save" onclick="saveToCache()">저장</button>
+      <button class="btn btn-clear-all" onclick="resetAllData()">💥 데이터 초기화</button>
+    </div>
+    <div class="load-input-group">
+      <label for="save-select">📂 불러오기:</label>
+      <select id="save-select" onchange="onSelectChange(this)">
+      </select>
+      <button class="btn btn-delete" onclick="deleteFromCache()">삭제</button>
+    </div>
+  </div>
+
+  <!-- 상단 요약 정보 (스크롤 시 고정됨) -->
+  <div class="summary-panel" style="position: sticky; top: 0; z-index: 100; background-color: #ffffff;">
+    <div class="summary-item">
+      <label for="rate">캐쉬 비율 (1만원당 지전)</label>
+      <input type="number" id="rate" value="3.2" step="0.1" oninput="handleCommonInput()">
+    </div>
+    <div class="summary-item">
+      <label>총 필요 현금(만원)</label>
+      <div class="value" id="total-cash-10k">0 만원</div>
+    </div>
+    <div class="summary-item">
+      <label>필요 지전</label>
+      <div class="value" id="total-jijeon">0 냥</div>
+    </div>
+    <div class="summary-item profit-element">
+      <label>총 재화가치</label>
+      <div class="value" id="total-comp-value">0 냥</div>
+    </div>
+    <div class="summary-item profit-element">
+      <label>총 차익 (총재화가치 - 필요지전)</label>
+      <div class="value" id="total-profit">0 냥</div>
+    </div>
+  </div>
+
+  <div class="grid-container">
+    <!-- 좌측: 상품 선택 및 수량 입력 -->
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>상품명 및 구성품</th>
+            <th>단가(원)</th>
+            <th class="clickable-header" onclick="toggleZeroItems()" title="클릭하여 수량 0인 상품 숨기기/보이기">
+              수량 <span id="qty-toggle-icon">👁️</span>
+            </th>
+            <th>금액(원)</th>
+            <th class="profit-element">차익<br>(만 냥)</th>
+          </tr>
+        </thead>
+        <tbody id="product-list">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 우측: 구성품 자동 집계 -->
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>구성품 집계 항목</th>
+            <th class="profit-element" style="width: 100px;">재화가치(억)</th>
+            <th style="width: 80px;">총 수량</th>
+          </tr>
+        </thead>
+        <tbody id="component-list">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 알림 영역 -->
+<div id="toast">알림 메시지</div>
+
+<script>
+// 상품 정보 데이터
+const products = [
+  { id: 'p1', type: '단일상품', name: '불사조의깃털', price: 3500, compDesc: '불사조의깃털', compItems: [{ name: '불사조의깃털', qty: 1 }] },
+  { id: 'p2', type: '단일상품', name: '봉황의깃털', price: 3500, compDesc: '봉황의깃털', compItems: [{ name: '봉황의깃털', qty: 1 }] },
+  { id: 'p3', type: '단일상품', name: '봉인의돌', price: 4000, compDesc: '봉인의돌', compItems: [{ name: '봉인의돌', qty: 1 }] },
+  { id: 'p4', type: '단일상품', name: '봉인의서', price: 4000, compDesc: '봉인의서', compItems: [{ name: '봉인의서', qty: 1 }] },
+  { id: 'p5', type: '단일상품', name: '각성석', price: 5000, compDesc: '각성석', compItems: [{ name: '각성석', qty: 1 }] },
+  { id: 'p6', type: '단일상품', name: '봉기부', price: 6000, compDesc: '봉기부', compItems: [{ name: '봉기부', qty: 1 }] },
+  { id: 'p7', type: '단일상품', name: '개명허가서', price: 7000, compDesc: '개명허가서', compItems: [{ name: '개명허가서', qty: 1 }] },
+  { id: 'p8', type: '단일상품', name: '규화보전 + 철희상자', price: 8000, compDesc: '규화보전 + 철희상자', compItems: [{ name: '규화보전', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p9', type: '단일상품', name: '식객명부1차 장수 + 철희상자', price: 8000, compDesc: '식객명부1차 장수 + 철희상자', compItems: [{ name: '식객명부1차 장수', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p10', type: '단일상품', name: '식객명부2차 장수 + 철희상자', price: 8000, compDesc: '식객명부2차 장수 + 철희상자', compItems: [{ name: '식객명부2차 장수', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p11', type: '단일상품', name: '주머니확장증서 + 철희상자', price: 9000, compDesc: '주머니확장증서 + 철희상자', compItems: [{ name: '주머니확장증서', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p12', type: '단일상품', name: '귀화의서약(조선) + 철희상자', price: 10000, compDesc: '귀화의서약(조선) + 철희상자', compItems: [{ name: '귀화의서약(조선)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p13', type: '단일상품', name: '귀화의서약(중국) + 철희상자', price: 10000, compDesc: '귀화의서약(중국) + 철희상자', compItems: [{ name: '귀화의서약(중국)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p14', type: '단일상품', name: '귀화의서약(일본) + 철희상자', price: 10000, compDesc: '귀화의서약(일본) + 철희상자', compItems: [{ name: '귀화의서약(일본)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p15', type: '단일상품', name: '귀화의서약(대만) + 철희상자', price: 10000, compDesc: '귀화의서약(대만) + 철희상자', compItems: [{ name: '귀화의서약(대만)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p16', type: '단일상품', name: '직업서(무투가) + 철희상자', price: 10000, compDesc: '직업서(무투가) + 철희상자', compItems: [{ name: '직업서(무투가)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p17', type: '단일상품', name: '직업서(악사) + 철희상자', price: 10000, compDesc: '직업서(악사) + 철희상자', compItems: [{ name: '직업서(악사)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p18', type: '단일상품', name: '환생의서 + 철희상자', price: 14000, compDesc: '환생의서 + 철희상자', compItems: [{ name: '환생의서', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p19', type: '단일상품', name: '다재다능 + 철희상자', price: 16000, compDesc: '다재다능 + 철희상자', compItems: [{ name: '다재다능', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  
+  { id: 'p20', type: '패키지', name: '옷장 패키지', price: 8000, compDesc: '옷장 확장증서 × 5 + 철희상자', compItems: [{ name: '옷장 확장증서', qty: 5 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p21', type: '패키지', name: '깃털패키지', price: 10000, compDesc: '불사조의깃털 × 2 + 봉황의깃털 + 철희상자', compItems: [{ name: '불사조의깃털', qty: 2 }, { name: '봉황의깃털', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p22', type: '패키지', name: '정령 패키지 - 푸른색 알', price: 14000, compDesc: '푸른색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '푸른색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p23', type: '패키지', name: '정령 패키지 - 붉은색 알', price: 14000, compDesc: '붉은색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '붉은색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p24', type: '패키지', name: '정령 패키지 - 백은색 알', price: 14000, compDesc: '백은색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '백은색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p25', type: '패키지', name: '정령 패키지 - 황금색 알', price: 14000, compDesc: '황금색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '황금색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p26', type: '패키지', name: '정령 패키지 - 초록색 알', price: 14000, compDesc: '초록색 알 + 봉인의서 + 일석이조(30일) + 철희상자', compItems: [{ name: '초록색 알', qty: 1 }, { name: '봉인의서', qty: 1 }, { name: '일석이조(30일)', qty: 1 }, { name: '철희상자', qty: 1 }] },
+  { id: 'p27', type: '패키지', name: '식객명부 패키지', price: 18000, compDesc: '식객명부(용병) + 식객명부(몬스터) + 식객명부(1차) + 식객명부(2차) + 철희상자 × 2', compItems: [{ name: '식객명부(용병)', qty: 1 }, { name: '식객명부(몬스터)', qty: 1 }, { name: '식객명부(1차)', qty: 1 }, { name: '식객명부(2차)', qty: 1 }, { name: '철희상자', qty: 2 }] },
+  { id: 'p28', type: '패키지', name: '백의종군 패키지', price: 19000, compDesc: '백의종군 × 4 + 철희상자 × 2', compItems: [{ name: '백의종군', qty: 4 }, { name: '철희상자', qty: 2 }] },
+  { id: 'p29', type: '패키지', name: '봉인의돌 패키지', price: 24000, compDesc: '봉인의돌 × 6 + 철희상자 × 2', compItems: [{ name: '봉인의돌', qty: 6 }, { name: '철희상자', qty: 2 }] },
+  { id: 'p30', type: '패키지', name: '봉인의서 패키지', price: 24000, compDesc: '봉인의서 × 6 + 철희상자 × 2', compItems: [{ name: '봉인의서', qty: 6 }, { name: '철희상자', qty: 2 }] },
+  { id: 'p31', type: '패키지', name: '종합 선물세트', price: 33000, compDesc: '손자병법 + 2차 식객명부 + 각성석 + 불사조의깃털 + 철희상자 × 3', compItems: [{ name: '손자병법', qty: 1 }, { name: '2차 식객명부', qty: 1 }, { name: '각성석', qty: 1 }, { name: '불사조의깃털', qty: 1 }, { name: '철희상자', qty: 3 }] },
+  { id: 'p32', type: '패키지', name: '귀서 패키지', price: 45000, compDesc: '귀화의서약(조선) + 귀화의서약(중국) + 귀화의서약(일본) + 귀화의서약(대만) + 불사조의깃털 + 봉황의깃털 + 철희상자 × 5', compItems: [{ name: '귀화의서약(조선)', qty: 1 }, { name: '귀화의서약(중국)', qty: 1 }, { name: '귀화의서약(일본)', qty: 1 }, { name: '귀화의서약(대만)', qty: 1 }, { name: '불사조의깃털', qty: 1 }, { name: '봉황의깃털', qty: 1 }, { name: '철희상자', qty: 5 }] }
+];
+
+const compNames = [
+  '불사조의깃털', '봉황의깃털', '봉인의돌', '봉인의서', '각성석', '봉기부', '개명허가서',
+  '규화보전', '식객명부1차 장수', '식객명부2차 장수', '주머니확장증서', '귀화의서약(조선)',
+  '귀화의서약(중국)', '귀화의서약(일본)', '귀화의서약(대만)', '직업서(무투가)', '직업서(악사)',
+  '환생의서', '다재다능', '옷장 확장증서', '푸른색 알', '붉은색 알', '백은색 알',
+  '황금색 알', '초록색 알', '일석이조(30일)', '식객명부(용병)', '식객명부(몬스터)',
+  '식객명부(1차)', '식객명부(2차)', '백의종군', '손자병법', '2차 식객명부', '철희상자'
+];
+
+const STORAGE_PREFIX = 'gersang_calc_slot_';
+const COMMON_STORAGE_KEY = 'gersang_calc_common_data';
+const FAVORITES_STORAGE_KEY = 'gersang_calc_favorites';
+
+let isDirty = false;
+let currentLoadedSlot = '';
+let previousSelectValue = '';
+let isProfitModeOn = false;
+let isZeroHidden = false;
+
+// 상품 즐겨찾기 상태 관리를 위한 Set
+let favorites = new Set();
+
+let commonData = {
+  rate: 3.2,
+  values: {}
+};
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.innerText = message;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2500);
+}
+
+// 즐겨찾기 로드 / 저장
+function loadFavorites() {
+  const saved = localStorage.getItem(FAVORITES_STORAGE_KEY);
+  if (saved) {
+    try {
+      const arr = JSON.parse(saved);
+      favorites = new Set(arr);
+    } catch(e) {}
+  }
+}
+
+function saveFavorites() {
+  localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(Array.from(favorites)));
+}
+
+function toggleFavorite(id, name) {
+  if (favorites.has(id)) {
+    favorites.delete(id);
+    showToast(`☆ '${name}' 즐겨찾기가 해제되었습니다.`);
+  } else {
+    favorites.add(id);
+    showToast(`★ '${name}' 즐겨찾기에 추가되었습니다.`);
+  }
+  saveFavorites();
+  
+  // 상태 변경 후 목록 재정렬 및 렌더링
+  renderProductTable();
+  calculate(false);
+}
+
+// 좌측 상품 수량 0 숨기기/보이기 토글
+function toggleZeroItems() {
+  isZeroHidden = !isZeroHidden;
+  const icon = document.getElementById('qty-toggle-icon');
+
+  if (isZeroHidden) {
+    icon.innerText = '🙈';
+    showToast('🙈 수량이 0인 상품이 숨겨졌습니다.');
+  } else {
+    icon.innerText = '👁️';
+    showToast('👁️ 모든 상품이 표시됩니다.');
+  }
+  calculate(false);
+}
+
+function toggleProfitMode() {
+  isProfitModeOn = !isProfitModeOn;
+  if (isProfitModeOn) {
+    document.body.classList.remove('profit-mode-off');
+    showToast('👁️ 차익 계산 항목이 표시됩니다.');
+  } else {
+    document.body.classList.add('profit-mode-off');
+    showToast('🙈 차익 계산 항목이 숨겨집니다.');
+  }
+}
+
+function loadCommonData() {
+  const saved = localStorage.getItem(COMMON_STORAGE_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      if (parsed.rate !== undefined) commonData.rate = parsed.rate;
+      if (parsed.values) commonData.values = parsed.values;
+    } catch(e) {}
+  }
+  document.getElementById('rate').value = commonData.rate;
+}
+
+function saveCommonData() {
+  localStorage.setItem(COMMON_STORAGE_KEY, JSON.stringify(commonData));
+}
+
+function init() {
+  loadCommonData();
+  loadFavorites();
+
+  renderProductTable();
+  renderComponentTable();
+  updateSaveOptions();
+  calculate(false);
+}
+
+// 상품 테이블 렌더링 (즐겨찾기 상단 정렬 지원)
+function renderProductTable() {
+  const tbody = document.getElementById('product-list');
+  
+  // 기존 입력된 수량들을 보존
+  const currentQtys = {};
+  products.forEach(p => {
+    currentQtys[p.id] = getQty(p.id);
+  });
+
+  tbody.innerHTML = '';
+
+  // 즐겨찾기 순 ➔ 기존 순 정렬
+  const sortedProducts = [...products].sort((a, b) => {
+    const isFavA = favorites.has(a.id);
+    const isFavB = favorites.has(b.id);
+    if (isFavA && !isFavB) return -1;
+    if (!isFavA && isFavB) return 1;
+    return 0; // 동일 레벨일 땐 기존 순서 유지
+  });
+
+  sortedProducts.forEach(p => {
+    const isFav = favorites.has(p.id);
+    const tr = document.createElement('tr');
+    tr.id = `row-${p.id}`;
+    
+    tr.innerHTML = `
+      <td class="center-col">${p.type}</td>
+      <td>
+        <div class="product-cell">
+          <span class="star-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${p.id}', '${p.name}')">${isFav ? '★' : '☆'}</span>
+          <div class="product-info">
+            <span class="product-title">${p.name}</span>
+            <span class="product-comp">(${p.compDesc})</span>
+          </div>
+        </div>
+      </td>
+      <td class="number-col">${p.price.toLocaleString()}</td>
+      <td class="center-col">
+        <input type="number" id="qty-${p.id}" class="qty-input" value="${currentQtys[p.id] || 0}" min="0" 
+               oninput="handleInput(this)" onblur="handleBlur(this)">
+      </td>
+      <td class="number-col" id="subtotal-${p.id}">0</td>
+      <td class="number-col profit-element" id="profit-${p.id}">0</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// 구성품 테이블 생성/렌더링 (수량 존재 여부 기준 우선 정렬)
+function renderComponentTable() {
+  const compTbody = document.getElementById('component-list');
+  compTbody.innerHTML = '';
+
+  // 수량 계산
+  const compQuantities = {};
+  compNames.forEach(name => compQuantities[name] = 0);
+  products.forEach(p => {
+    const pQty = getQty(p.id);
+    if (pQty > 0) {
+      p.compItems.forEach(item => {
+        if (compQuantities[item.name] !== undefined) {
+          compQuantities[item.name] += item.qty * pQty;
+        }
+      });
+    }
+  });
+
+  const compRaw = compNames.map(name => ({
+    name: name,
+    val: commonData.values[name] || 0,
+    qty: compQuantities[name]
+  }));
+
+  // 정렬 우선순위: 수량이 있는 항목 ➔ 일반 항목
+  compRaw.sort((a, b) => {
+    if (a.qty > 0 && b.qty === 0) return -1;
+    if (a.qty === 0 && b.qty > 0) return 1;
+    return 0;
+  });
+
+  compRaw.forEach(item => {
+    const tr = document.createElement('tr');
+    tr.id = `comp-row-${item.name}`;
+    if (item.qty > 0) tr.classList.add('has-value');
+
+    tr.innerHTML = `
+      <td>
+        <span>${item.name}</span>
+      </td>
+      <td class="center-col profit-element">
+        <input type="number" class="val-input" data-name="${item.name}" value="${item.val}" step="0.01" min="0" max="9.99" 
+               oninput="handleValInput(this)" onblur="handleValBlur(this)">
+      </td>
+      <td class="center-col" id="comp-qty-${item.name}">${item.qty.toLocaleString()}</td>
+    `;
+    compTbody.appendChild(tr);
+  });
+}
+
+function handleInput(input) {
+  if (input.value !== '') {
+    input.value = parseInt(input.value, 10);
+  }
+  isDirty = true;
+  calculate(true);
+}
+
+function handleBlur(input) {
+  if (input.value === '' || isNaN(input.value) || parseInt(input.value, 10) < 0) {
+    input.value = 0;
+  } else {
+    input.value = parseInt(input.value, 10);
+  }
+  calculate(true);
+}
+
+function handleCommonInput() {
+  commonData.rate = parseFloat(document.getElementById('rate').value) || 0;
+  saveCommonData();
+  calculate(false);
+}
+
+function handleValInput(input) {
+  const name = input.getAttribute('data-name');
+  let val = parseFloat(input.value);
+  if (isNaN(val)) val = 0;
+  if (val > 9.99) val = 9.99;
+  if (val < 0) val = 0;
+  commonData.values[name] = val;
+  saveCommonData();
+  calculate(false);
+}
+
+function handleValBlur(input) {
+  const name = input.getAttribute('data-name');
+  let val = parseFloat(input.value);
+  if (isNaN(val) || val < 0) val = 0;
+  if (val > 9.99) val = 9.99;
+  
+  val = Math.round(val * 100) / 100;
+  input.value = val;
+  commonData.values[name] = val;
+  saveCommonData();
+  calculate(false);
+}
+
+function resetAll() {
+  if (isDirty && !confirm('작성 중인 변경사항이 있습니다. 수량을 초기화하시겠습니까?')) {
+    return;
+  }
+  products.forEach(p => {
+    const input = document.getElementById(`qty-${p.id}`);
+    if (input) input.value = 0;
+  });
+  document.getElementById('save-name').value = '';
+  document.getElementById('save-select').value = '';
+  previousSelectValue = '';
+  currentLoadedSlot = '';
+  isDirty = false;
+  calculate(true);
+  showToast('수량이 초기화되었습니다.');
+}
+
+// 모든 데이터 초기화 (비율, 재화가치, 저장 목록, 즐겨찾기 완전 삭제)
+function resetAllData() {
+  if (confirm('캐쉬 비율, 재화가치, 저장 목록, 즐겨찾기 등 모든 데이터가 삭제됩니다.\n정말로 전체 초기화하시겠습니까?')) {
+    // 1. 계산기 관련 로컬스토리지 모든 키 삭제
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith(STORAGE_PREFIX) || key === COMMON_STORAGE_KEY || key === FAVORITES_STORAGE_KEY) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+
+    // 2. 변수 및 상태 초기화
+    commonData = { rate: 3.2, values: {} };
+    favorites = new Set();
+    currentLoadedSlot = '';
+    previousSelectValue = '';
+    isDirty = false;
+
+    // 3. 새로고침으로 깔끔하게 초기 상태 반영
+    location.reload();
+  }
+}
+
+function getQty(id) {
+  const el = document.getElementById(`qty-${id}`);
+  if (!el) return 0;
+  const val = parseInt(el.value, 10);
+  return isNaN(val) || val < 0 ? 0 : val;
+}
+
+function getSavedSlots() {
+  const slots = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith(STORAGE_PREFIX)) {
+      const slotName = key.replace(STORAGE_PREFIX, '');
+      try {
+        slots[slotName] = JSON.parse(localStorage.getItem(key));
+      } catch (e) {}
+    }
+  }
+  return slots;
+}
+
+function updateSaveOptions() {
+  const select = document.getElementById('save-select');
+  select.innerHTML = '';
+  
+  const slots = getSavedSlots();
+  const keys = Object.keys(slots).sort((a, b) => a.localeCompare(b, 'ko'));
+
+  const defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.text = keys.length === 0 ? '저장된 항목 없음' : '-- 불러올 목록 선택 --';
+  select.appendChild(defaultOption);
+
+  keys.forEach(key => {
+    const option = document.createElement('option');
+    option.value = key;
+    option.text = key;
+    select.appendChild(option);
+  });
+
+  select.value = currentLoadedSlot;
+  previousSelectValue = select.value;
+}
+
+function getNextTempName() {
+  const slots = getSavedSlots();
+  let maxNum = 0;
+  Object.keys(slots).forEach(name => {
+    const match = name.match(/^임시저장\s*(\d+)$/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num > maxNum) maxNum = num;
+    }
+  });
+  return `임시저장 ${maxNum + 1}`;
+}
+
+function saveToCache(customName = null) {
+  const nameInput = document.getElementById('save-name');
+  let saveName = customName || nameInput.value.trim();
+
+  if (!saveName) {
+    saveName = getNextTempName();
+  }
+
+  const quantities = {};
+  products.forEach(p => {
+    quantities[p.id] = getQty(p.id);
+  });
+
+  const data = { quantities };
+
+  localStorage.setItem(STORAGE_PREFIX + saveName, JSON.stringify(data));
+  
+  currentLoadedSlot = saveName;
+  nameInput.value = saveName;
+  isDirty = false;
+  
+  updateSaveOptions();
+  showToast(`💾 '${saveName}' 저장 완료!`);
+}
+
+function loadSlot(slotName) {
+  if (!slotName) return;
+
+  const saved = localStorage.getItem(STORAGE_PREFIX + slotName);
+  if (!saved) return;
+
+  try {
+    const data = JSON.parse(saved);
+
+    if (data.quantities) {
+      products.forEach(p => {
+        const input = document.getElementById(`qty-${p.id}`);
+        if (input && data.quantities[p.id] !== undefined) {
+          input.value = data.quantities[p.id];
+        }
+      });
+    }
+
+    document.getElementById('save-name').value = slotName;
+    currentLoadedSlot = slotName;
+    previousSelectValue = slotName;
+    isDirty = false;
+
+    calculate(true);
+    showToast(`📂 '${slotName}' 세팅을 불러왔습니다.`);
+  } catch (e) {
+    showToast('데이터를 불러오는 도중 오류가 발생했습니다.');
+  }
+}
+
+function onSelectChange(select) {
+  const targetSlot = select.value;
+
+  if (isDirty) {
+    const confirmSave = confirm('수정 중인 내용이 저장되지 않았습니다. 현재 내용을 저장하시겠습니까?');
+    if (confirmSave) {
+      saveToCache();
+    }
+  }
+
+  if (targetSlot) {
+    loadSlot(targetSlot);
+  } else {
+    currentLoadedSlot = '';
+    previousSelectValue = '';
+    document.getElementById('save-name').value = '';
+  }
+}
+
+function deleteFromCache() {
+  const select = document.getElementById('save-select');
+  const selectedName = select.value;
+
+  if (!selectedName) {
+    showToast('⚠️ 삭제할 저장 항목을 선택해주세요.');
+    return;
+  }
+
+  if (confirm(`정말로 '${selectedName}' 항목을 삭제하시겠습니까?`)) {
+    localStorage.removeItem(STORAGE_PREFIX + selectedName);
+    
+    if (currentLoadedSlot === selectedName) {
+      currentLoadedSlot = '';
+      document.getElementById('save-name').value = '';
+    }
+    
+    updateSaveOptions();
+    showToast(`🗑️ '${selectedName}' 삭제 완료`);
+  }
+}
+
+function formatMoneyKorean(valueInOk) {
+  if (valueInOk === 0) return '0 냥';
+
+  const isNegative = valueInOk < 0;
+  const absOk = Math.abs(valueInOk);
+
+  const totalTenThousand = Math.round(absOk * 10000);
+  const okPart = Math.floor(totalTenThousand / 10000);
+  const manPart = totalTenThousand % 10000;
+
+  let resultStr = '';
+  if (okPart > 0) {
+    resultStr += `${okPart.toLocaleString()}억 `;
+  }
+  if (manPart > 0) {
+    resultStr += `${manPart.toLocaleString()}만 `;
+  }
+
+  if (resultStr === '') resultStr = '0 ';
+
+  return (isNegative ? '-' : '') + resultStr.trim() + ' 냥';
+}
+
+function formatProfitHTML(value, suffix = '') {
+  let colorClass = 'profit-zero';
+  let formatted = value.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2});
+  if (value > 0) {
+    colorClass = 'profit-positive';
+    formatted = '+' + formatted;
+  } else if (value < 0) {
+    colorClass = 'profit-negative';
+  }
+  return `<span class="${colorClass}">${formatted}${suffix}</span>`;
+}
+
+function formatProfitKoreanHTML(valueInOk) {
+  let colorClass = 'profit-zero';
+  const text = formatMoneyKorean(valueInOk);
+
+  if (valueInOk > 0) {
+    colorClass = 'profit-positive';
+    return `<span class="${colorClass}">+${text}</span>`;
+  } else if (valueInOk < 0) {
+    colorClass = 'profit-negative';
+    return `<span class="${colorClass}">${text}</span>`;
+  }
+  return `<span class="${colorClass}">${text}</span>`;
+}
+
+// 계산 로직
+function calculate(shouldRerenderComp = false) {
+  let totalCash = 0;
+  const rate = parseFloat(document.getElementById('rate').value) || 0;
+
+  // 1. 개별 상품 계산 및 차익 구하기
+  products.forEach(p => {
+    const qty = getQty(p.id);
+    const subtotal = qty * p.price;
+    totalCash += subtotal;
+
+    const subtotalEl = document.getElementById(`subtotal-${p.id}`);
+    if (subtotalEl) subtotalEl.innerText = subtotal.toLocaleString();
+
+    const cashValue1Set = rate * p.price;
+
+    let compValue1Set = 0;
+    p.compItems.forEach(item => {
+      const itemValInOk = commonData.values[item.name] || 0;
+      compValue1Set += (itemValInOk * 10000) * item.qty;
+    });
+
+    const profit1Set = compValue1Set - cashValue1Set;
+    const profitEl = document.getElementById(`profit-${p.id}`);
+    if (profitEl) profitEl.innerHTML = formatProfitHTML(profit1Set);
+
+    const row = document.getElementById(`row-${p.id}`);
+    if (row) {
+      if (qty > 0) {
+        row.classList.add('has-value');
+        row.classList.remove('hide-zero');
+      } else {
+        row.classList.remove('has-value');
+        if (isZeroHidden) {
+          row.classList.add('hide-zero');
+        } else {
+          row.classList.remove('hide-zero');
+        }
+      }
+    }
+  });
+
+  // 상단 요약 값 업데이트
+  const totalCash10k = totalCash / 10000;
+  const totalJijeonInOk = totalCash10k * rate;
+
+  document.getElementById('total-cash-10k').innerText = totalCash10k.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2}) + ' 만원';
+  document.getElementById('total-jijeon').innerText = formatMoneyKorean(totalJijeonInOk);
+
+  // 2. 구성품 수량 및 재화가치 집계
+  if (shouldRerenderComp) {
+    renderComponentTable();
+  }
+
+  let totalCompValueSumOk = 0;
+  compNames.forEach(name => {
+    let pQtyTotal = 0;
+    products.forEach(p => {
+      const pQty = getQty(p.id);
+      if (pQty > 0) {
+        p.compItems.forEach(item => {
+          if (item.name === name) pQtyTotal += item.qty * pQty;
+        });
+      }
+    });
+
+    const val = commonData.values[name] || 0;
+    totalCompValueSumOk += val * pQtyTotal;
+
+    const qtyCell = document.getElementById(`comp-qty-${name}`);
+    if (qtyCell) qtyCell.innerText = pQtyTotal.toLocaleString();
+
+    const compRow = document.getElementById(`comp-row-${name}`);
+    if (compRow) {
+      if (pQtyTotal > 0) {
+        compRow.classList.add('has-value');
+      } else {
+        compRow.classList.remove('has-value');
+      }
+    }
+  });
+
+  // 3. 총 재화가치 및 총 차익 표시
+  document.getElementById('total-comp-value').innerText = formatMoneyKorean(totalCompValueSumOk);
+
+  const totalProfit = totalCompValueSumOk - totalJijeonInOk;
+  document.getElementById('total-profit').innerHTML = formatProfitKoreanHTML(totalProfit);
+}
+
+window.onload = init;
+
+async function openBoxCalculator() {
+  const response = await fetch('box-modal.html');
+  const htmlContent = await response.text();
+
+  const blob = new Blob([htmlContent], { type: 'text/html' });
+  const blobUrl = URL.createObjectURL(blob);
+
+  window.open(blobUrl, '_blank');
+}
+</script>
+</body>
+</html>
