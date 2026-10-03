@@ -931,6 +931,7 @@
                   </div>
                 ` : `
                   <input type="number" step="any" value="${ingStore.basePrice || ''}" placeholder="가격 입력" oninput="updatePrice('${ingName}', 'basePrice', this.value)"> 만냥
+
                 `}
                 ${ingStore.useBuyPrice ? `<br><input type="number" step="any" style="margin-top:4px;" value="${ingStore.buyPrice || ''}" placeholder="구매가 입력" oninput="updatePrice('${ingName}', 'buyPrice', this.value)"> 만냥` : ''}
               </td>
@@ -1129,7 +1130,7 @@
         totalBuyPriceSum += buyPrice * qty;
       });
 
-      // 제작 비용 탭과 동일한 정렬 조건 적용 (검색어 지정 -> 깊이 순 -> 즐겨찾기 -> 이름순)
+      // 정렬 조건 적용 (검색 연관 우선 -> 트리 깊이 순 -> 즐겨찾기) *이름 정렬 제외*
       let targetSearchSet = new Set();
       selectedSearchItems.forEach(item => {
         getAllSubIngredients(item).forEach(sub => targetSearchSet.add(sub));
@@ -1147,9 +1148,7 @@
 
         const aFav = favorites.has(aName) ? 1 : 0;
         const bFav = favorites.has(bName) ? 1 : 0;
-        if (aFav !== bFav) return bFav - aFav;
-
-        return aName.localeCompare(bName);
+        return bFav - aFav;
       });
 
       let html = `<h4>[다중 목표 제작 필요 목록 및 예상 비용 합산]</h4><b>합산 필요 재료 목록:</b><ul style="line-height: 1.8;">`;
@@ -1190,7 +1189,7 @@
       html += `
         <div style="margin-top: 15px; padding-top: 10px; border-top: 2px dashed #007bff; font-size: 1.05em;">
           <b>💰 예상 총 제작 비용:</b> <span style="color:#d32f2f; font-weight:bold;">${formatCurrency(totalCraftCostSum)}</span><br>
-          ${totalBuyPriceSum > 0 ? `<b>🏷️️ 예상 총 구매 비용:</b> <span style="color:#1976d2; font-weight:bold;">${formatCurrency(totalBuyPriceSum)}</span>` : ''}
+          ${totalBuyPriceSum > 0 ? `<b>🏷 예상 총 구매 비용:</b> <span style="color:#1976d2; font-weight:bold;">${formatCurrency(totalBuyPriceSum)}</span>` : ''}
         </div>
       `;
 
