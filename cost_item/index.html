@@ -1,9 +1,20 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XT7WN5EW7B"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-XT7WN5EW7B');
+  </script>
+  <!-- 공통 네비게이션 스크립트 불러오기 -->
+  <script src="/nav.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>제작도감 비용 및 수량 계산기</title>
+  <title>💰제작도감 비용 및 수량 계산기</title>
   <script src="recipes.js" defer></script>
   <style>
     :root {
@@ -228,7 +239,7 @@
       <!-- 카테고리 필터 및 즐겨찾기전용 버튼 -->
       <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
         <div>
-          <span style="font-size:0.85em; font-weight:bold; color:#555; margin-right:6px;">직업 필터:</span>
+          <span style="font-size:0.85em; font-weight:bold; color:#555; margin-right:6px;">분류 필터:</span>
           <span id="categoryFilterContainer" class="filter-group" style="display:inline-flex;"></span>
         </div>
         <div style="border-left: 1px solid #ccc; padding-left: 15px; display: flex; gap: 10px; align-items: center;">
@@ -243,7 +254,7 @@
       <div class="search-box-container">
         <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
           <div class="search-input-wrapper">
-            <input type="text" id="itemSearchInput" class="search-input" placeholder="품목 검색 (띄어쓰기 무시, 중간일치 지원)..." oninput="handleSearchInput(this.value)">
+            <input type="text" id="itemSearchInput" class="search-input" placeholder="품목 검색" oninput="handleSearchInput(this.value)">
             <div id="suggestionsList" class="suggestions-list"></div>
           </div>
           <label style="font-size:0.85em; cursor:pointer;">
@@ -652,7 +663,9 @@
                     <label><input type="checkbox" ${ingStore.useBuyPrice ? 'checked' : ''} onchange="updatePrice('${ingName}', 'useBuyPrice', this.checked)"> 구매가 추종</label>
                   </div>
                 ` : `
+                                    <input type="number" step="any" value="${ingStore.basePrice || ''}" placeholder="가격 입력" oninput="updatePrice('${ingName}', 'basePrice', this.value)"> 만냥
                 `}
+                ${ingStore.useBuyPrice ? `<br><input type="number" step="any" style="margin-top:4px;" value="${ingStore.buyPrice || ''}" placeholder="구매가 입력" oninput="updatePrice('${ingName}', 'buyPrice', this.value)"> 만냥` : ''}
               </td>
             </tr>
           `;

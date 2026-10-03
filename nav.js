@@ -1,7 +1,7 @@
 const CALCULATOR_LIST = [
   { name: "💳 추석 캐쉬 할인 계산기", url: "/cash/" },
   { name: "🍾 어주(小) 계산기", url: "/uju/" },
-  { name: "아이템 제작비용계산기", url: "/cost_item/" }
+  { name: "💰아이템 제작비용계산기", url: "/cost_item/" }
 ];
 
 (function injectNavStyles() {
