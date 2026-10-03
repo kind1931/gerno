@@ -18,18 +18,28 @@
     }
     h1 { margin-bottom: 10px; }
 
+    /* 3. 상단 고정 요소 (Sticky Header Setup) */
+    .sticky-header-container {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: #f8f9fa;
+      padding-top: 10px;
+      padding-bottom: 5px;
+    }
+
     .control-panel {
       background: #fff;
-      padding: 15px;
+      padding: 12px 15px;
       border-radius: 8px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       display: flex;
       gap: 15px;
       align-items: center;
     }
 
-    .tab-buttons { display: flex; gap: 5px; margin-bottom: 15px; }
+    .tab-buttons { display: flex; gap: 5px; margin-bottom: 0; }
     .tab-btn {
       padding: 10px 20px;
       border: 1px solid #ccc;
@@ -49,10 +59,20 @@
     }
     .tab-content.active { display: block; }
     
-    /* 카테고리 필터 버튼 */
-    .filter-group { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    /* 필터 및 검색 레이아웃 */
+    .filter-section {
+      background: #f1f3f5;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .filter-group { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
     .filter-btn {
-      padding: 6px 12px;
+      padding: 5px 12px;
       border: 1px solid #007bff;
       background: #fff;
       color: #007bff;
@@ -63,14 +83,99 @@
     }
     .filter-btn.active { background: #007bff; color: white; }
 
+    /* 검색 UI 스타일 */
+    .search-box-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .search-input-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 450px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 0.9em;
+    }
+    .suggestions-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #007bff;
+      border-top: none;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border-radius: 0 0 4px 4px;
+      display: none;
+    }
+    .suggestion-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 0.88em;
+    }
+    .suggestion-item:hover { background-color: #eef7ff; }
+
+    .selected-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .tag {
+      background: #007bff;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 0.85em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tag-close {
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.3);
+    }
+    .tag-close:hover { background: rgba(255,255,255,0.6); }
+
     /* 즐겨찾기 별 버튼 */
     .star-btn { cursor: pointer; color: #ccc; font-size: 1.2em; user-select: none; margin-right: 4px; }
     .star-btn.active { color: #fbc02d; }
 
-    /* 테이블 스타일 */
+    /* 테이블 헤더 Sticky 및 클릭 스타일 */
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    th { background-color: #f2f2f2; }
+    
+    th {
+      background-color: #f2f2f2;
+      position: sticky;
+      top: 105px; /* 상단 고정 컨테이너 높이에 맞춰 조절 */
+      z-index: 90;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    th.clickable-header {
+      cursor: pointer;
+      user-select: none;
+    }
+    th.clickable-header:hover {
+      background-color: #e2e2e2;
+    }
     
     .bg-simple { background-color: var(--bg-simple) !important; }
     .bg-crafted { background-color: var(--bg-crafted) !important; }
@@ -98,31 +203,65 @@
 
   <h1>제작도감 계산기</h1>
 
-  <div class="control-panel">
-    <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
-      <label><input type="checkbox" id="autoSaveToggle"> 변경사항 자동 저장</label>
-      <button onclick="saveToLocalStorage()" style="padding: 6px 12px; cursor: pointer;">저장</button>
-      <button onclick="clearLocalStorage()" style="padding: 6px 12px; cursor: pointer;">데이터 초기화</button>
+  <!-- 3. 스크롤 시 고정되는 상단 헤더 컨테이너 -->
+  <div class="sticky-header-container">
+    <div class="control-panel">
+      <div style="font-weight: bold; font-size: 1.05em; color: #007bff;">제작도감 비용/수량 스마트 계산기</div>
+      <div style="margin-left: auto; display: flex; gap: 10px; align-items: center;">
+        <label style="cursor:pointer;"><input type="checkbox" id="autoSaveToggle"> 변경사항 자동 저장</label>
+        <button onclick="saveToLocalStorage()" style="padding: 6px 12px; cursor: pointer;">저장</button>
+        <button onclick="clearLocalStorage()" style="padding: 6px 12px; cursor: pointer;">데이터 초기화</button>
+      </div>
     </div>
-  </div>
 
-  <div class="tab-buttons">
-    <button class="tab-btn active" onclick="switchTab('costTab', this)">제작 비용</button>
-    <button class="tab-btn" onclick="switchTab('quantityTab', this)">제작 수량</button>
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab('costTab', this)">제작 비용</button>
+      <button class="tab-btn" onclick="switchTab('quantityTab', this)">제작 수량</button>
+    </div>
   </div>
 
   <!-- 탭 1: 제작 비용 -->
   <div id="costTab" class="tab-content active">
     <h3>주요 품목 제작 비용 계산 (단위: 만냥)</h3>
-    <div style="margin-bottom: 6px;">
-      <label style="font-size:0.9em; font-weight:bold; color:#555;">카테고리 필터 (중복 선택 가능):</label>
+    
+    <div class="filter-section">
+      <!-- 카테고리 필터 및 즐겨찾기전용 버튼 -->
+      <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+        <div>
+          <span style="font-size:0.85em; font-weight:bold; color:#555; margin-right:6px;">직업 필터:</span>
+          <span id="categoryFilterContainer" class="filter-group" style="display:inline-flex;"></span>
+        </div>
+        <div style="border-left: 1px solid #ccc; padding-left: 15px; display: flex; gap: 10px; align-items: center;">
+          <button id="favOnlyBtn" class="filter-btn" onclick="toggleFavoriteFilter()">★ 즐겨찾기만 보기</button>
+          <label style="font-size:0.85em; cursor:pointer;">
+            <input type="checkbox" id="favIncludeSubToggle" checked onchange="renderCostTable()"> 즐겨찾기 하위재료 포함
+          </label>
+        </div>
+      </div>
+
+      <!-- 1. 다중 아이템 검색 영역 -->
+      <div class="search-box-container">
+        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+          <div class="search-input-wrapper">
+            <input type="text" id="itemSearchInput" class="search-input" placeholder="품목 검색 (띄어쓰기 무시, 중간일치 지원)..." oninput="handleSearchInput(this.value)">
+            <div id="suggestionsList" class="suggestions-list"></div>
+          </div>
+          <label style="font-size:0.85em; cursor:pointer;">
+            <input type="checkbox" id="searchIncludeSubToggle" checked onchange="renderCostTable()"> 검색 아이템의 하위재료 함께 보기
+          </label>
+        </div>
+        
+        <div id="selectedTagsContainer" class="selected-tags"></div>
+      </div>
     </div>
-    <div id="categoryFilterContainer" class="filter-group"></div>
 
     <table id="costTable">
       <thead>
         <tr>
-          <th>품목명 (★ 즐겨찾기)</th>
+          <!-- 2. 헤더 클릭 시 즐겨찾기 필터 토글 -->
+          <th class="clickable-header" onclick="toggleFavoriteFilter()" title="클릭 시 즐겨찾기 품목만 필터링합니다.">
+            품목명 (<span style="color:#fbc02d;">★</span> 즐겨찾기)
+          </th>
           <th>1회 제작수량</th>
           <th>필요 재료 및 가격</th>
           <th>1회 총 제작비용</th>
@@ -158,6 +297,8 @@
     let priceStore = {};
     let favorites = new Set();
     let selectedJobs = new Set();
+    let selectedSearchItems = new Set(); // 다중 검색 선택 항목
+    let showFavOnly = false; // 즐겨찾기 전용 필터 상태
     let autoSave = false;
 
     const STORAGE_KEY = 'craft_calculator_prices_v6';
@@ -199,6 +340,24 @@
       return match[2] === '만' ? num : match[2] === '천' ? num * 0.1 : (num >= 1000 ? num / 10000 : num);
     }
 
+    /* 문자열 공백 제거 헬퍼 (띄어쓰기 무시 검색용) */
+    function normalizeStr(str) {
+      return String(str || '').replace(/\s+/g, '').toLowerCase();
+    }
+
+    /* 재귀적으로 모든 하위 재료 이름 가져오기 */
+    function getAllSubIngredients(itemName, visited = new Set()) {
+      if (visited.has(itemName)) return visited;
+      visited.add(itemName);
+      const recipe = recipes.find(r => getItemName(r) === itemName);
+      if (recipe && recipe.ingredients) {
+        recipe.ingredients.forEach(ing => {
+          getAllSubIngredients(getItemName(ing), visited);
+        });
+      }
+      return visited;
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       loadLocalStorage();
 
@@ -215,6 +374,13 @@
       document.getElementById('autoSaveToggle').addEventListener('change', (e) => {
         autoSave = e.target.checked;
         if (autoSave) showToast('자동 저장이 활성화되었습니다.', 'info');
+      });
+
+      // 외부 클릭 시 검색 추천 닫기
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-input-wrapper')) {
+          document.getElementById('suggestionsList').style.display = 'none';
+        }
       });
     });
 
@@ -251,7 +417,7 @@
       });
     }
 
-    /* 2. 즐겨찾기 토글 (상단 고정 정렬) */
+    /* 2. 즐겨찾기 토글 및 전용 필터링 */
     function toggleFavorite(itemName) {
       if (favorites.has(itemName)) {
         favorites.delete(itemName);
@@ -260,6 +426,74 @@
       }
       localStorage.setItem(FAV_STORAGE_KEY, JSON.stringify([...favorites]));
       renderCostTable();
+    }
+
+    function toggleFavoriteFilter() {
+      showFavOnly = !showFavOnly;
+      const favBtn = document.getElementById('favOnlyBtn');
+      if (favBtn) {
+        if (showFavOnly) favBtn.classList.add('active');
+        else favBtn.classList.remove('active');
+      }
+      renderCostTable();
+    }
+
+    /* 1. 검색 처리 및 자동완성 */
+    function handleSearchInput(query) {
+      const listContainer = document.getElementById('suggestionsList');
+      const normQuery = normalizeStr(query);
+      if (!normQuery) {
+        listContainer.style.display = 'none';
+        return;
+      }
+
+      const matches = recipes.filter(r => {
+        const name = getItemName(r);
+        return normalizeStr(name).includes(normQuery);
+      });
+
+      if (matches.length === 0) {
+        listContainer.style.display = 'none';
+        return;
+      }
+
+      listContainer.innerHTML = '';
+      matches.slice(0, 15).forEach(m => {
+        const name = getItemName(m);
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'suggestion-item';
+        itemDiv.textContent = `${name} ${m.job ? `[${m.job}]` : ''}`;
+        itemDiv.onclick = () => {
+          addSearchItem(name);
+          document.getElementById('itemSearchInput').value = '';
+          listContainer.style.display = 'none';
+        };
+        listContainer.appendChild(itemDiv);
+      });
+      listContainer.style.display = 'block';
+    }
+
+    function addSearchItem(itemName) {
+      selectedSearchItems.add(itemName);
+      renderSearchTags();
+      renderCostTable();
+    }
+
+    function removeSearchItem(itemName) {
+      selectedSearchItems.delete(itemName);
+      renderSearchTags();
+      renderCostTable();
+    }
+
+    function renderSearchTags() {
+      const container = document.getElementById('selectedTagsContainer');
+      container.innerHTML = '';
+      selectedSearchItems.forEach(name => {
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.innerHTML = `${name} <span class="tag-close" onclick="removeSearchItem('${name}')">&times;</span>`;
+        container.appendChild(tag);
+      });
     }
 
     function initPriceStore() {
@@ -332,13 +566,52 @@
       tbody.innerHTML = '';
 
       let filtered = recipes.filter(r => r.isMainItem !== false);
+
+      // 카테고리 필터
       if (selectedJobs.size > 0) {
         filtered = filtered.filter(r => selectedJobs.has(r.job));
       }
 
+      // 검색 선택 집합 및 하위재료 산출
+      const searchIncludeSub = document.getElementById('searchIncludeSubToggle')?.checked ?? true;
+      let targetSearchSet = new Set();
+      if (selectedSearchItems.size > 0) {
+        selectedSearchItems.forEach(item => {
+          if (searchIncludeSub) {
+            getAllSubIngredients(item).forEach(sub => targetSearchSet.add(sub));
+          } else {
+            targetSearchSet.add(item);
+          }
+        });
+      }
+
+      // 즐겨찾기 필터 및 하위재료 산출
+      const favIncludeSub = document.getElementById('favIncludeSubToggle')?.checked ?? true;
+      let targetFavSet = new Set();
+      if (showFavOnly) {
+        favorites.forEach(favItem => {
+          if (favIncludeSub) {
+            getAllSubIngredients(favItem).forEach(sub => targetFavSet.add(sub));
+          } else {
+            targetFavSet.add(favItem);
+          }
+        });
+        filtered = filtered.filter(r => targetFavSet.has(getItemName(r)));
+      }
+
+      // 정렬 logic: 1. 검색 선택/하위 항목 상단 -> 2. 즐겨찾기 항목 상단
       filtered.sort((a, b) => {
-        const aFav = favorites.has(getItemName(a)) ? 1 : 0;
-        const bFav = favorites.has(getItemName(b)) ? 1 : 0;
+        const aName = getItemName(a);
+        const bName = getItemName(b);
+
+        if (selectedSearchItems.size > 0) {
+          const aInSearch = targetSearchSet.has(aName) ? 1 : 0;
+          const bInSearch = targetSearchSet.has(bName) ? 1 : 0;
+          if (aInSearch !== bInSearch) return bInSearch - aInSearch;
+        }
+
+        const aFav = favorites.has(aName) ? 1 : 0;
+        const bFav = favorites.has(bName) ? 1 : 0;
         return bFav - aFav;
       });
 
@@ -379,9 +652,7 @@
                     <label><input type="checkbox" ${ingStore.useBuyPrice ? 'checked' : ''} onchange="updatePrice('${ingName}', 'useBuyPrice', this.checked)"> 구매가 추종</label>
                   </div>
                 ` : `
-                  <input type="number" step="any" value="${ingStore.basePrice || ''}" placeholder="가격 입력" oninput="updatePrice('${ingName}', 'basePrice', this.value)"> 만냥
                 `}
-                ${ingStore.useBuyPrice ? `<br><input type="number" step="any" style="margin-top:4px;" value="${ingStore.buyPrice || ''}" placeholder="구매가 입력" oninput="updatePrice('${ingName}', 'buyPrice', this.value)"> 만냥` : ''}
               </td>
             </tr>
           `;
@@ -504,6 +775,8 @@
         localStorage.removeItem(FAV_STORAGE_KEY);
         priceStore = {};
         favorites.clear();
+        selectedSearchItems.clear();
+        renderSearchTags();
         initPriceStore();
         renderCostTable();
         showToast('정보가 초기화되었습니다.', 'warn');
