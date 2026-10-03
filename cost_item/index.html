@@ -380,9 +380,12 @@
       <!-- 선택된 품목 목표 수량 조절 -->
       <div id="qtyTargetItemsContainer" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;"></div>
       
-      <div style="margin-top: 15px;">
+      <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+        <label id="buyFollowLabel" style="font-weight: bold; color: #2563eb; cursor: pointer;">
+          <input type="checkbox" id="buyFollowDecomposeToggle" onchange="onBuyFollowToggleChange()"> 구매가 추종이 없는 품목만 최하위 재료로 분해하여 보기
+        </label>
         <label style="font-weight: bold; color: #d32f2f; cursor: pointer;">
-          <input type="checkbox" id="flatMaterialsToggle" onchange="calculateMultiQuantity()"> 모든 품목 최하위 재료로 일괄 분해하여 보기
+          <input type="checkbox" id="flatMaterialsToggle" onchange="onFlatToggleChange()"> 모든 품목 최하위 재료로 일괄 분해하여 보기
         </label>
       </div>
     </div>
@@ -409,6 +412,41 @@
     const STORAGE_KEY = 'craft_calculator_prices_v6';
     const FAV_STORAGE_KEY = 'craft_calculator_favs_v6';
     const SEARCH_STORAGE_KEY = 'craft_calculator_search_v6';
+
+    /* 금액 단위 단위 표현 포맷터 (만냥 단위 기준) */
+    function formatCurrency(valInTenThousand) {
+      if (valInTenThousand === 0 || isNaN(valInTenThousand)) return "0 만냥";
+      
+      let rawNyang = BigInt(Math.floor(valInTenThousand * 10000));
+      if (rawNyang === 0n) {
+        return `${Number(valInTenThousand.toFixed(4)).toLocaleString()} 만냥`;
+      }
+
+      const JO = 1000000000000n; // 1조 냥
+      const EOK = 100000000n;    // 1억 냥
+      const MAN = 10000n;       // 1만 냥
+
+      let result = [];
+      
+      let jo = rawNyang / JO;
+      rawNyang %= JO;
+      
+      let eok = rawNyang / EOK;
+      rawNyang %= EOK;
+      
+      let man = rawNyang / MAN;
+      let restNyang = rawNyang % MAN;
+
+      if (jo > 0n) result.push(`${jo.toLocaleString()}조`);
+      if (eok > 0n) result.push(`${eok.toLocaleString()}억`);
+      if (man > 0n) result.push(`${man.toLocaleString()}만`);
+
+      if (result.length === 0) {
+        return `${restNyang.toLocaleString()}냥`;
+      }
+      
+      return `${result.join(' ')} 만냥`;
+    }
 
     function showToast(message, type = 'success', duration = 2500) {
       const container = document.getElementById('toastContainer');
@@ -753,7 +791,7 @@
     function updateCalculatedUI() {
       document.querySelectorAll('[data-applied-price]').forEach(el => {
         const ingName = el.getAttribute('data-applied-price');
-        el.textContent = `적용가: ${Number(getEffectivePrice(ingName).toFixed(4)).toLocaleString()}만냥`;
+        el.textContent = `적용가: ${formatCurrency(getEffectivePrice(ingName))}`;
       });
 
       recipes.filter(r => r.isMainItem !== false).forEach(item => {
@@ -769,8 +807,8 @@
         const safeId = encodeURIComponent(name);
         const totalCell = document.getElementById(`total-cost-${safeId}`);
         const unitCell = document.getElementById(`unit-cost-${safeId}`);
-        if (totalCell) totalCell.textContent = `${Number(craftCostPerBatch.toFixed(4)).toLocaleString()} 만냥`;
-        if (unitCell) unitCell.innerHTML = `<b>${Number(unitCraftCost.toFixed(4)).toLocaleString()} 만냥</b>`;
+        if (totalCell) totalCell.textContent = formatCurrency(craftCostPerBatch);
+        if (unitCell) unitCell.innerHTML = `<b>${formatCurrency(unitCraftCost)}</b>`;
       });
       
       calculateMultiQuantity();
@@ -875,7 +913,7 @@
               </td>
               <td>
                 ${isCrafted ? `
-                  <span data-applied-price="${ingName}">적용가: ${Number(ingPrice.toFixed(4)).toLocaleString()}만냥</span>
+                  <span data-applied-price="${ingName}">적용가: ${formatCurrency(ingPrice)}</span>
                   <div class="price-type-toggle">
                     <label><input type="checkbox" ${ingStore.useBuyPrice ? 'checked' : ''} onchange="updatePrice('${ingName}', 'useBuyPrice', this.checked)"> 구매가 추종</label>
                   </div>
@@ -896,8 +934,8 @@
           </td>
           <td><b>${minCraft}개</b></td>
           <td><table class="sub-table" style="width:100%;">${ingRows}</table></td>
-          <td id="total-cost-${safeId}">${Number(craftCostPerBatch.toFixed(4)).toLocaleString()} 만냥</td>
-          <td id="unit-cost-${safeId}"><b>${Number(unitCraftCost.toFixed(4)).toLocaleString()} 만냥</b></td>
+          <td id="total-cost-${safeId}">${formatCurrency(craftCostPerBatch)}</td>
+          <td id="unit-cost-${safeId}"><b>${formatCurrency(unitCraftCost)}</b></td>
           <td>
             <input type="number" step="any" value="${storeData.buyPrice || ''}" placeholder="구매가격" ${!storeData.useBuyPrice ? 'disabled' : ''} oninput="updatePrice('${name}', 'buyPrice', this.value)"> 만냥
             <div class="price-type-toggle">
@@ -946,8 +984,30 @@
       calculateMultiQuantity();
     }
 
+    /* 옵션 간 체크 상태 연동 처리 */
+    function onFlatToggleChange() {
+      const flatToggle = document.getElementById('flatMaterialsToggle');
+      const buyFollowToggle = document.getElementById('buyFollowDecomposeToggle');
+
+      if (flatToggle && flatToggle.checked && buyFollowToggle) {
+        buyFollowToggle.checked = false;
+      }
+      calculateMultiQuantity();
+    }
+
+    function onBuyFollowToggleChange() {
+      const flatToggle = document.getElementById('flatMaterialsToggle');
+      const buyFollowToggle = document.getElementById('buyFollowDecomposeToggle');
+
+      if (buyFollowToggle && buyFollowToggle.checked && flatToggle) {
+        flatToggle.checked = false;
+      }
+      calculateMultiQuantity();
+    }
+
     function calculateMultiQuantity() {
       const globalFlat = document.getElementById('flatMaterialsToggle')?.checked || false;
+      const buyFollowDecompose = document.getElementById('buyFollowDecomposeToggle')?.checked || false;
       const resultDiv = document.getElementById('quantityResult');
       if (!resultDiv) return;
 
@@ -961,7 +1021,16 @@
 
       function processCraft(itemName, neededAmount, isRootTarget) {
         const recipe = recipes.find(r => getItemName(r) === itemName);
-        const shouldExpand = globalFlat || expandedCraftItems.has(itemName);
+        const hasBuyPrice = !!priceStore[itemName]?.useBuyPrice;
+
+        let shouldExpand = false;
+        if (globalFlat) {
+          shouldExpand = true;
+        } else if (buyFollowDecompose) {
+          shouldExpand = !hasBuyPrice;
+        } else {
+          shouldExpand = expandedCraftItems.has(itemName);
+        }
 
         if (!recipe) {
           if (!isRootTarget) {
@@ -1036,7 +1105,7 @@
                 <input type="checkbox" ${isExpanded ? 'checked' : ''} onchange="toggleItemExpand('${mat}', this.checked)"> 하위재료 분해
               </label>
             ` : ''}
-            <small style="color:#555; margin-left:6px;">(적용단가: ${Number(itemCraftTotal.toFixed(4)).toLocaleString()} 만냥 ${buyPrice > 0 ? `/ 구매비: ${Number(itemBuyTotal.toFixed(4)).toLocaleString()} 만냥` : ''})</small>
+            <small style="color:#555; margin-left:6px;">(적용단가: ${formatCurrency(itemCraftTotal)} ${buyPrice > 0 ? `/ 구매비: ${formatCurrency(itemBuyTotal)}` : ''})</small>
           </li>
         `;
       }
@@ -1052,8 +1121,8 @@
 
       html += `
         <div style="margin-top: 15px; padding-top: 10px; border-top: 2px dashed #007bff; font-size: 1.05em;">
-          <b>💰 예상 총 제작 비용:</b> <span style="color:#d32f2f; font-weight:bold;">${Number(totalCraftCostSum.toFixed(4)).toLocaleString()} 만냥</span><br>
-          ${totalBuyPriceSum > 0 ? `<b>🏷️ 예상 총 구매 비용:</b> <span style="color:#1976d2; font-weight:bold;">${Number(totalBuyPriceSum.toFixed(4)).toLocaleString()} 만냥</span>` : ''}
+          <b>💰 예상 총 제작 비용:</b> <span style="color:#d32f2f; font-weight:bold;">${formatCurrency(totalCraftCostSum)}</span><br>
+          ${totalBuyPriceSum > 0 ? `<b>🏷️ 예상 총 구매 비용:</b> <span style="color:#1976d2; font-weight:bold;">${formatCurrency(totalBuyPriceSum)}</span>` : ''}
         </div>
       `;
 
