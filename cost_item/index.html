@@ -322,7 +322,11 @@
       <div class="search-box-container">
         <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
           <div class="search-input-wrapper">
-            <input type="text" id="costSearchInput" class="search-input" placeholder="품목 검색 (방향키/Enter 선택 가능)" oninput="handleSearchInput('costSearchInput', 'costSuggestionsList', this.value)" onkeydown="handleSearchKeyDown(event, 'costSearchInput', 'costSuggestionsList')">
+            <input type="text" id="costSearchInput" class="search-input" 
+                placeholder="품목 검색 (방향키/Enter 선택 가능)" 
+                onfocus="handleSearchFocus('costSearchInput', 'costSuggestionsList')"
+                oninput="handleSearchInput('costSearchInput', 'costSuggestionsList', this.value)" 
+                onkeydown="handleSearchKeyDown(event, 'costSearchInput', 'costSuggestionsList')">
             <div id="costSuggestionsList" class="suggestions-list"></div>
           </div>
           <label style="font-size:0.85em; cursor:pointer;">
@@ -359,7 +363,11 @@
         <!-- 공통 검색 영역 (수량 탭) -->
         <div class="search-box-container">
           <div class="search-input-wrapper">
-            <input type="text" id="qtySearchInput" class="search-input" placeholder="수량 계산 품목 추가 검색 (방향키/Enter 가능)" oninput="handleSearchInput('qtySearchInput', 'qtySuggestionsList', this.value)" onkeydown="handleSearchKeyDown(event, 'qtySearchInput', 'qtySuggestionsList')">
+            <input type="text" id="qtySearchInput" class="search-input" 
+                placeholder="수량 계산 품목 추가 검색 (방향키/Enter 가능)" 
+                onfocus="handleSearchFocus('qtySearchInput', 'qtySuggestionsList')"
+                oninput="handleSearchInput('qtySearchInput', 'qtySuggestionsList', this.value)" 
+                onkeydown="handleSearchKeyDown(event, 'qtySearchInput', 'qtySuggestionsList')">
             <div id="qtySuggestionsList" class="suggestions-list"></div>
           </div>
           <div id="qtySelectedTagsContainer" class="selected-tags"></div>
@@ -657,17 +665,42 @@
       renderCostTable();
     }
 
+    // 1. 검색창 포커스 이벤트 처리 함수
+    function handleSearchFocus(inputId, listId) {
+      const input = document.getElementById(inputId);
+      handleSearchInput(inputId, listId, input.value);
+    }
+
+    // 2. 추천검색어 생성 및 정렬
     function handleSearchInput(inputId, listId, query) {
       const listContainer = document.getElementById(listId);
       const normQuery = normalizeStr(query);
       activeSuggestionIndex = -1;
 
+      // 이미 선택된(추가된) 품목 제외
+      let availableRecipes = recipes.filter(r => !selectedSearchItems.has(getItemName(r)));
+
+      let matches = [];
+
       if (!normQuery) {
-        listContainer.style.display = 'none';
-        return;
+        // 💡 입력이 없을 때는 즐겨찾기 추가된 항목만 추천으로 표시
+        matches = availableRecipes.filter(r => favorites.has(getItemName(r)));
+      } else {
+        // 💡 검색어가 있을 때: 검색어를 포함하는 항목 필터링
+        matches = availableRecipes.filter(r => normalizeStr(getItemName(r)).includes(normQuery));
+
+        // 💡 정렬: 즐겨찾기 항목 최상위 배치 -> 품목명 오름차순
+        matches.sort((a, b) => {
+          const aName = getItemName(a);
+          const bName = getItemName(b);
+          const aFav = favorites.has(aName) ? 1 : 0;
+          const bFav = favorites.has(bName) ? 1 : 0;
+
+          if (aFav !== bFav) return bFav - aFav; // 즐겨찾기가 우선
+          return aName.localeCompare(bName);
+        });
       }
 
-      const matches = recipes.filter(r => normalizeStr(getItemName(r)).includes(normQuery));
       if (matches.length === 0) {
         listContainer.style.display = 'none';
         return;
@@ -676,10 +709,13 @@
       listContainer.innerHTML = '';
       matches.slice(0, 15).forEach((m, idx) => {
         const name = getItemName(m);
+        const isFav = favorites.has(name);
         const itemDiv = document.createElement('div');
         itemDiv.className = 'suggestion-item';
         itemDiv.dataset.index = idx;
-        itemDiv.textContent = `${name} ${m.job ? `[${m.job}]` : ''}`;
+        
+        // 즐겨찾기 항목에 ★ 표시 추가
+        itemDiv.innerHTML = `${isFav ? '<span style="color:#fbc02d; font-weight:bold;">★ </span>' : ''}${name} ${m.job ? `<small style="color:#666;">[${m.job}]</small>` : ''}`;
         itemDiv.onclick = () => selectSearchItem(name, inputId, listId);
         listContainer.appendChild(itemDiv);
       });
