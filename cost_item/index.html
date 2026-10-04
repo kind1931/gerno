@@ -1170,16 +1170,18 @@
           return;
         }
 
+        // 보유 수량 차감 후 실제 추가 제작이 필요한 수량 계산
+        const currentOwned = ownedItems[itemName] || 0;
+        const actualNeeded = Math.max(0, neededAmount - currentOwned);
+
         if (isRootTarget) {
-          const minCraft = getItemCraftCount(recipe);
-          const craftBatches = Math.ceil(neededAmount / minCraft);
-          const leftover = (craftBatches * minCraft) - neededAmount;
+          if (actualNeeded > 0) {
+            const minCraft = getItemCraftCount(recipe);
+            const craftBatches = Math.ceil(actualNeeded / minCraft);
+            const leftover = (craftBatches * minCraft) - actualNeeded;
 
-          if (leftover > 0) leftoverMaterials[itemName] = (leftoverMaterials[itemName] || 0) + leftover;
+            if (leftover > 0) leftoverMaterials[itemName] = (leftoverMaterials[itemName] || 0) + leftover;
 
-          // 루트 품목 자체의 보유량이 충족된 경우에도 하위 재료 분해 차단
-          const rootOwned = ownedItems[itemName] || 0;
-          if (rootOwned < neededAmount) {
             (recipe.ingredients || []).forEach(ing => {
               processCraft(getItemName(ing), getIngCount(ing) * craftBatches, false);
             });
@@ -1187,26 +1189,22 @@
           return;
         }
 
-        if (!shouldExpand || parentReady) {
+        // 하위 항목 처리
+        if (!shouldExpand || parentReady || actualNeeded === 0) {
           requiredMaterials[itemName] = (requiredMaterials[itemName] || 0) + neededAmount;
           return;
         }
 
+        // 하위 분해 진행 (실제 필요 수량 기준 계산)
         const minCraft = getItemCraftCount(recipe);
-        const craftBatches = Math.ceil(neededAmount / minCraft);
-        const leftover = (craftBatches * minCraft) - neededAmount;
+        const craftBatches = Math.ceil(actualNeeded / minCraft);
+        const leftover = (craftBatches * minCraft) - actualNeeded;
 
         if (leftover > 0) leftoverMaterials[itemName] = (leftoverMaterials[itemName] || 0) + leftover;
 
-        // 자신의 보유수량이 필요수량 이상인 경우 하위 재료 분해 중단
-        const currentOwned = ownedItems[itemName] || 0;
-        if (currentOwned < neededAmount) {
-          (recipe.ingredients || []).forEach(ing => {
-            processCraft(getItemName(ing), getIngCount(ing) * craftBatches, false);
-          });
-        } else {
-          requiredMaterials[itemName] = (requiredMaterials[itemName] || 0) + neededAmount;
-        }
+        (recipe.ingredients || []).forEach(ing => {
+          processCraft(getItemName(ing), getIngCount(ing) * craftBatches, false);
+        });
       }
 
       selectedSearchItems.forEach(tName => {
