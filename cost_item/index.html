@@ -440,7 +440,7 @@
     <div id="ownedOverviewSection" class="owned-overview-section">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span style="font-weight:bold; font-size:0.92em; color:#166534;">📦 보유 중인 모든 품목 수량 관리 (0개 초과 보유 품목):</span>
-        <small style="color:#666;">* 현재 화면에 분해되지 않아 표시되지 않는 품목 수량도 여기서 수정할 수 있습니다.</small>
+        <small style="color:#666;">* 현재 조회 중인 제조 품목 및 하위 재료 중 보유 중인 항목만 표시됩니다.</small>
       </div>
       <div id="ownedGridContainer" class="owned-grid"></div>
     </div>
@@ -1098,9 +1098,20 @@
       const container = document.getElementById('ownedGridContainer');
       if (!container) return;
 
-      const keys = Object.keys(ownedItems).filter(k => ownedItems[k] > 0);
+      // 1. 현재 선택된 제조품목과 해당 품목들의 모든 하위 재료 목록(Set) 수집
+      let validMaterials = new Set();
+      const validTargets = [...selectedSearchItems].filter(tName => (qtyTargetItems[tName] || 0) > 0);
+
+      validTargets.forEach(tName => {
+        validMaterials.add(tName); // 본인(최상위 제조품목) 추가
+        getAllSubIngredients(tName).forEach(sub => validMaterials.add(sub)); // 모든 하위재료 추가
+      });
+
+      // 2. 보유 중인 품목(수량 > 0) 중, 현재 계산 대상(validMaterials)에 속한 품목만 필터링
+      const keys = Object.keys(ownedItems).filter(k => ownedItems[k] > 0 && validMaterials.has(k));
+
       if (keys.length === 0) {
-        container.innerHTML = '<span style="color:#888; font-size:0.85em;">현재 보유 중으로 등록된 품목이 없습니다.</span>';
+        container.innerHTML = '<span style="color:#888; font-size:0.85em;">현재 제조 품목의 재료 중 보유 중인 품목이 없습니다.</span>';
         return;
       }
 
