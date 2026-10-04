@@ -525,7 +525,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "40",
-    "item_name": "백수정(생명+15)",
+    "item_name": "백수정",
     "yield": "5개",
     "crafting_fee": "5만",
     "ingredients": [
@@ -546,7 +546,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "45",
-    "item_name": "사금석(민첩+15)",
+    "item_name": "사금석",
     "yield": "5개",
     "crafting_fee": "5만",
     "ingredients": [
@@ -567,7 +567,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "50",
-    "item_name": "월장석(지력+15)",
+    "item_name": "월장석",
     "yield": "5개",
     "crafting_fee": "5만",
     "ingredients": [
@@ -588,7 +588,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "60",
-    "item_name": "흑요석(힘+15)",
+    "item_name": "흑요석",
     "yield": "5개",
     "crafting_fee": "30만",
     "ingredients": [
@@ -609,7 +609,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "70",
-    "item_name": "적혈석(올스텟+5)",
+    "item_name": "적혈석",
     "yield": "5개",
     "crafting_fee": "30만",
     "ingredients": [
@@ -647,7 +647,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "90",
-    "item_name": "세공된 백수정(생명+30)",
+    "item_name": "세공된 백수정",
     "yield": "5개",
     "crafting_fee": "100만",
     "ingredients": [
@@ -702,7 +702,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "110",
-    "item_name": "세공된 사금석(민첩+30)",
+    "item_name": "세공된 사금석",
     "yield": "5개",
     "crafting_fee": "200만",
     "ingredients": [
@@ -744,7 +744,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "125",
-    "item_name": "세공된 월장석(지력+30)",
+    "item_name": "세공된 월장석",
     "yield": "5개",
     "crafting_fee": "200만",
     "ingredients": [
@@ -786,7 +786,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "135",
-    "item_name": "세공된 흑요석(힘+30)",
+    "item_name": "세공된 흑요석",
     "yield": "5개",
     "crafting_fee": "500만",
     "ingredients": [
@@ -807,7 +807,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "140",
-    "item_name": "세공된 적혈석(올스텟+10)",
+    "item_name": "세공된 적혈석",
     "yield": "5개",
     "crafting_fee": "500만",
     "ingredients": [
@@ -912,7 +912,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "165",
-    "item_name": "강화된 백수정(생명+60)",
+    "item_name": "강화된 백수정",
     "yield": "1개",
     "crafting_fee": "1,000만",
     "ingredients": [
@@ -937,7 +937,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "170",
-    "item_name": "강화된 사금석(민첩+60)",
+    "item_name": "강화된 사금석",
     "yield": "1개",
     "crafting_fee": "1,000만",
     "ingredients": [
@@ -962,7 +962,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "175",
-    "item_name": "강화된 월장석(지력+60)",
+    "item_name": "강화된 월장석",
     "yield": "1개",
     "crafting_fee": "2,000만",
     "ingredients": [
@@ -987,7 +987,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "180",
-    "item_name": "강화된 적혈석(올스텟+20)",
+    "item_name": "강화된 적혈석",
     "yield": "1개",
     "crafting_fee": "3,000만",
     "ingredients": [
@@ -1350,7 +1350,7 @@ const defaultRecipes = [
     ]
   },
   {
-    "job": "세공사",
+    "job": "강화",
     "required_level": "-",
     "item_name": "세공된 적마노(강화)",
     "yield": "-",
@@ -1396,7 +1396,7 @@ const defaultRecipes = [
     ]
   },
   {
-    "job": "세공사",
+    "job": "강화",
     "required_level": "-",
     "item_name": "세공된 남옥(강화)",
     "yield": "-",
@@ -1442,7 +1442,7 @@ const defaultRecipes = [
     ]
   },
   {
-    "job": "세공사",
+    "job": "강화",
     "required_level": "-",
     "item_name": "세공된 석웅황(강화)",
     "yield": "-",
@@ -1488,7 +1488,7 @@ const defaultRecipes = [
     ]
   },
   {
-    "job": "세공사",
+    "job": "강화",
     "required_level": "-",
     "item_name": "세공된 벽옥(강화)",
     "yield": "-",
