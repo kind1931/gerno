@@ -78,7 +78,7 @@ const defaultRecipes = [
   {
     "job": "연금술사",
     "required_level": "100렙",
-    "item_name": "연마용분말가루",
+    "item_name": "연마용 분말가루",
     "yield": "5개",
     "crafting_fee": "100만",
     "ingredients": [
@@ -904,7 +904,7 @@ const defaultRecipes = [
         "quantity": "10개"
       },
       {
-        "name": "연마용분말가루",
+        "name": "연마용 분말가루",
         "quantity": "5개"
       }
     ]
@@ -1033,7 +1033,7 @@ const defaultRecipes = [
         "quantity": "30개"
       },
       {
-        "name": "연마용분말가루",
+        "name": "연마용 분말가루",
         "quantity": "20개"
       }
     ]
@@ -1062,7 +1062,7 @@ const defaultRecipes = [
         "quantity": "100개"
       },
       {
-        "name": "연마용분말가루",
+        "name": "연마용 분말가루",
         "quantity": "20개"
       }
     ]
@@ -1091,7 +1091,7 @@ const defaultRecipes = [
         "quantity": "20개"
       },
       {
-        "name": "연마용분말가루",
+        "name": "연마용 분말가루",
         "quantity": "20개"
       }
     ]
@@ -1120,7 +1120,7 @@ const defaultRecipes = [
         "quantity": "2개"
       },
       {
-        "name": "연마용분말가루",
+        "name": "연마용 분말가루",
         "quantity": "10개"
       }
     ]
@@ -1203,7 +1203,7 @@ const defaultRecipes = [
         "quantity": "1개"
       },
       {
-        "name": "연마용분말가루",
+        "name": "연마용 분말가루",
         "quantity": "40개"
       }
     ]
