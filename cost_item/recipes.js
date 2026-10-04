@@ -1509,6 +1509,510 @@ const defaultRecipes = [
     ]
   },
   {
+    "job": "대장장이",
+    "required_level": "45렙",
+    "item_name": "청동",
+    "yield": "30개",
+    "crafting_fee": "10만",
+    "ingredients": [
+      {
+        "name": "구리",
+        "quantity": "30개"
+      },
+      {
+        "name": "주석",
+        "quantity": "30개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "70렙",
+    "item_name": "철괴",
+    "yield": "30개",
+    "crafting_fee": "150만",
+    "ingredients": [
+      {
+        "name": "석탄",
+        "quantity": "30개"
+      },
+      {
+        "name": "철",
+        "quantity": "30개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "110렙",
+    "item_name": "고급별운검",
+    "yield": "1개",
+    "crafting_fee": "200만",
+    "ingredients": [
+      {
+        "name": "철괴",
+        "quantity": "20개"
+      },
+      {
+        "name": "천년석",
+        "quantity": "20개"
+      },
+      {
+        "name": "자운비옥",
+        "quantity": "20개"
+      },
+      {
+        "name": "흑연",
+        "quantity": "20개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "145렙",
+    "item_name": "철제죔쇄",
+    "yield": "2개",
+    "crafting_fee": "1천만",
+    "ingredients": [
+      {
+        "name": "철괴",
+        "quantity": "30개"
+      },
+      {
+        "name": "화룡의불꽃",
+        "quantity": "1개"
+      },
+      {
+        "name": "청동",
+        "quantity": "30개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "150렙",
+    "item_name": "흑철괴",
+    "yield": "30개",
+    "crafting_fee": "5백만",
+    "ingredients": [
+      {
+        "name": "철괴",
+        "quantity": "20개"
+      },
+      {
+        "name": "흑연",
+        "quantity": "20개"
+      },
+      {
+        "name": "석회석",
+        "quantity": "20개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "150렙",
+    "item_name": "예래의곡괭이",
+    "yield": "1개",
+    "crafting_fee": "5백만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "50개"
+      },
+      {
+        "name": "백금",
+        "quantity": "50개"
+      },
+      {
+        "name": "은",
+        "quantity": "300개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "150렙",
+    "item_name": "한채의호미",
+    "yield": "1개",
+    "crafting_fee": "5백만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "50개"
+      },
+      {
+        "name": "황철석",
+        "quantity": "50개"
+      },
+      {
+        "name": "금",
+        "quantity": "300개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "165렙",
+    "item_name": "청룡언월도",
+    "yield": "1개",
+    "crafting_fee": "2천만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "100개"
+      },
+      {
+        "name": "적혼옥",
+        "quantity": "100개"
+      },
+      {
+        "name": "뇌전의결정",
+        "quantity": "30개"
+      },
+      {
+        "name": "황룡의비늘",
+        "quantity": "3개"
+      },
+      {
+        "name": "도",
+        "quantity": "1개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "170렙",
+    "item_name": "거한의도끼",
+    "yield": "1개",
+    "crafting_fee": "2천만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "100개"
+      },
+      {
+        "name": "황철석",
+        "quantity": "100개"
+      },
+      {
+        "name": "땅의결정",
+        "quantity": "30개"
+      },
+      {
+        "name": "화룡의불꽃",
+        "quantity": "3개"
+      },
+      {
+        "name": "도",
+        "quantity": "1개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "175렙",
+    "item_name": "늑대의조도",
+    "yield": "1개",
+    "crafting_fee": "2천만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "100개"
+      },
+      {
+        "name": "광호발톱",
+        "quantity": "20개"
+      },
+      {
+        "name": "도",
+        "quantity": "1개"
+      },
+      {
+        "name": "호안석",
+        "quantity": "100개"
+      },
+      {
+        "name": "바람의결정",
+        "quantity": "30개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "180렙",
+    "item_name": "자룡극",
+    "yield": "1개",
+    "crafting_fee": "3천만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "150개"
+      },
+      {
+        "name": "뇌전의결정",
+        "quantity": "30개"
+      },
+      {
+        "name": "재",
+        "quantity": "1개"
+      },
+      {
+        "name": "이무기비늘",
+        "quantity": "20개"
+      },
+      {
+        "name": "샤오링의노리개",
+        "quantity": "20개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "185렙",
+    "item_name": "무영은침",
+    "yield": "1개",
+    "crafting_fee": "3500만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "200개"
+      },
+      {
+        "name": "푸른수정",
+        "quantity": "50개"
+      },
+      {
+        "name": "북해빙정",
+        "quantity": "50개"
+      },
+      {
+        "name": "재",
+        "quantity": "2개"
+      },
+      {
+        "name": "원주민독침",
+        "quantity": "10개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "190렙",
+    "item_name": "후마표창",
+    "yield": "1개",
+    "crafting_fee": "4천만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "300개"
+      },
+      {
+        "name": "붉은수정",
+        "quantity": "50개"
+      },
+      {
+        "name": "불의결정",
+        "quantity": "50개"
+      },
+      {
+        "name": "재",
+        "quantity": "2개"
+      },
+      {
+        "name": "금강석",
+        "quantity": "30개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "195렙",
+    "item_name": "자령부",
+    "yield": "1개",
+    "crafting_fee": "5천만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "500개"
+      },
+      {
+        "name": "금강석",
+        "quantity": "30개"
+      },
+      {
+        "name": "검은수정",
+        "quantity": "20개"
+      },
+      {
+        "name": "불의결정",
+        "quantity": "50개"
+      },
+      {
+        "name": "물의결정",
+        "quantity": "50개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "195렙",
+    "item_name": "흑철주괴",
+    "yield": "20개",
+    "crafting_fee": "5백만",
+    "ingredients": [
+      {
+        "name": "흑철괴",
+        "quantity": "10개"
+      },
+      {
+        "name": "한철",
+        "quantity": "10개"
+      },
+      {
+        "name": "묵철",
+        "quantity": "10개"
+      },
+      {
+        "name": "철목",
+        "quantity": "10개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "205렙",
+    "item_name": "흑웅의갈퀴",
+    "yield": "1개",
+    "crafting_fee": "2천만",
+    "ingredients": [
+      {
+        "name": "흑철주괴",
+        "quantity": "50개"
+      },
+      {
+        "name": "강철손",
+        "quantity": "3개"
+      },
+      {
+        "name": "마수의발톱",
+        "quantity": "50개"
+      },
+      {
+        "name": "날카로운발톱",
+        "quantity": "50개"
+      },
+      {
+        "name": "신의금속",
+        "quantity": "5개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "215렙",
+    "item_name": "대장군포",
+    "yield": "1개",
+    "crafting_fee": "3천만",
+    "ingredients": [
+      {
+        "name": "차승자총통",
+        "quantity": "1개"
+      },
+      {
+        "name": "오문의대포조각",
+        "quantity": "20개"
+      },
+      {
+        "name": "태양의조각",
+        "quantity": "10개"
+      },
+      {
+        "name": "흑철주괴",
+        "quantity": "100개"
+      },
+      {
+        "name": "봉인된힘의조각",
+        "quantity": "20개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "215렙",
+    "item_name": "빛나는 철제죔쇄",
+    "yield": "1개",
+    "crafting_fee": "3천만",
+    "ingredients": [
+      {
+        "name": "철제죔쇄",
+        "quantity": "1개"
+      },
+      {
+        "name": "흑철주괴",
+        "quantity": "20개"
+      },
+      {
+        "name": "무지개석",
+        "quantity": "20개"
+      },
+      {
+        "name": "오색가루",
+        "quantity": "20개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "215렙",
+    "item_name": "철마의편자",
+    "yield": "1개",
+    "crafting_fee": "3천만",
+    "ingredients": [
+      {
+        "name": "청동심장",
+        "quantity": "10개"
+      },
+      {
+        "name": "신의금속",
+        "quantity": "5개"
+      },
+      {
+        "name": "고귀한신발장식",
+        "quantity": "5개"
+      },
+      {
+        "name": "각성석의조각",
+        "quantity": "5개"
+      }
+    ]
+  },
+  {
+    "job": "대장장이",
+    "required_level": "235렙",
+    "item_name": "땅의속성주괴",
+    "yield": "1개",
+    "crafting_fee": "1천만",
+    "ingredients": [
+      {
+        "name": "땅의원석",
+        "quantity": "5개"
+      },
+      {
+        "name": "흑철주괴",
+        "quantity": "2개"
+      },
+      {
+        "name": "안정제",
+        "quantity": "1개"
+      },
+      {
+        "name": "오색가루",
+        "quantity": "10개"
+      }
+    ]
+  },
+  {
     "job": "통합제작",
     "required_level": "-",
     "item_name": "오색결정조각",
@@ -1520,7 +2024,8 @@ const defaultRecipes = [
         "quantity": "10개"
       }
     ]
-  }
+  },
+  
 ]
 
 // HTML의 초기화 함수가 선언되어 있다면 즉시 전달

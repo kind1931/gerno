@@ -1208,7 +1208,7 @@
                 <input type="checkbox" ${isExpanded ? 'checked' : ''} onchange="toggleItemExpand('${mat}', this.checked)"> 하위재료 분해
               </label>
             ` : ''}
-            <small style="color:#555; margin-left:6px;">(적용단가: ${formatCurrency(itemCraftTotal)} ${buyPrice > 0 ? `/ 구매비: ${formatCurrency(itemBuyTotal)}` : ''})</small>
+            <small style="color:#555; margin-left:6px;">(적용가: ${formatCurrency(itemCraftTotal)} ${buyPrice > 0 ? `/ 구매비: ${formatCurrency(itemBuyTotal)}` : ''})</small>
           </li>
         `;
       }
