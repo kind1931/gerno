@@ -229,6 +229,12 @@
     .bg-crafted { background-color: var(--bg-crafted) !important; }
 
     input[type="number"] { padding: 6px; width: 110px; border: 1px solid #ccc; border-radius: 4px; }
+    /* 가격 미입력 시 테두리 강조 스타일 */
+    input[type="number"].price-missing {
+      border: 2px solid #ef4444 !important;
+      background-color: #fef2f2;
+    }
+
     .sub-table { margin-top: 8px; background: #fafafa; }
     
     .badge { display: inline-block; padding: 3px 7px; font-size: 0.8em; border-radius: 3px; font-weight: bold; }
@@ -440,7 +446,10 @@
     <div id="ownedOverviewSection" class="owned-overview-section">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <span style="font-weight:bold; font-size:0.92em; color:#166534;">📦 보유 중인 모든 품목 수량 관리 (0개 초과 보유 품목):</span>
-        <small style="color:#666;">* 현재 조회 중인 제조 품목 및 하위 재료 중 보유 중인 항목만 표시됩니다.</small>
+        <div>
+          <button onclick="clearAllOwnedItems()" class="btn btn-reset" style="padding: 3px 8px; font-size: 0.8em; margin-right: 8px;">보유 수량 초기화</button>
+          <small style="color:#666;">* 현재 조회 중인 제조 품목 및 하위 재료 중 보유 중인 항목만 표시됩니다.</small>
+        </div>
       </div>
       <div id="ownedGridContainer" class="owned-grid"></div>
     </div>
@@ -472,6 +481,7 @@
     const SEARCH_STORAGE_KEY = 'craft_calculator_search_v6';
     const TAB_STORAGE_KEY = 'craft_calculator_active_tab_v6';
     const OWNED_STORAGE_KEY = 'craft_calculator_owned_v6';
+    const AUTOSAVE_STORAGE_KEY = 'craft_calculator_autosave_v6';
 
     function formatCurrency(valInTenThousand) {
       if (valInTenThousand === 0 || isNaN(valInTenThousand)) return "0 만냥";
@@ -599,6 +609,21 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadLocalStorage();
 
+      const autoSaveEl = document.getElementById('autoSaveToggle');
+      if (autoSaveEl) {
+        autoSaveEl.checked = autoSave;
+        autoSaveEl.addEventListener('change', (e) => {
+          autoSave = e.target.checked;
+          localStorage.setItem(AUTOSAVE_STORAGE_KEY, autoSave);
+          if (autoSave) {
+            showToast('자동 저장이 활성화되었습니다.', 'info');
+            saveToLocalStorage(true);
+          } else {
+            showToast('자동 저장이 비활성화되었습니다.', 'info');
+          }
+        });
+      }
+
       if (typeof defaultRecipes !== 'undefined' && Array.isArray(defaultRecipes)) {
         recipes = defaultRecipes;
         initPriceStore();
@@ -616,11 +641,6 @@
       } else {
         showToast('recipes.js 데이터 로드에 실패했습니다.', 'warn', 4000);
       }
-
-      document.getElementById('autoSaveToggle').addEventListener('change', (e) => {
-        autoSave = e.target.checked;
-        if (autoSave) showToast('자동 저장이 활성화되었습니다.', 'info');
-      });
 
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-input-wrapper')) {
@@ -863,22 +883,22 @@
     function initPriceStore() {
       recipes.forEach(r => {
         const name = getItemName(r);
-        if (!priceStore[name]) priceStore[name] = { basePrice: 0, buyPrice: 0, useBuyPrice: false };
+        if (!priceStore[name]) priceStore[name] = { basePrice: null, buyPrice: 0, useBuyPrice: false };
         (r.ingredients || []).forEach(ing => {
           const ingName = getItemName(ing);
-          if (!priceStore[ingName]) priceStore[ingName] = { basePrice: 0, buyPrice: 0, useBuyPrice: false };
+          if (!priceStore[ingName]) priceStore[ingName] = { basePrice: null, buyPrice: 0, useBuyPrice: false };
         });
       });
     }
 
     function updatePrice(itemName, field, value) {
-      if (!priceStore[itemName]) priceStore[itemName] = { basePrice: 0, buyPrice: 0, useBuyPrice: false };
+      if (!priceStore[itemName]) priceStore[itemName] = { basePrice: null, buyPrice: 0, useBuyPrice: false };
       
       if (field === 'useBuyPrice') {
         priceStore[itemName].useBuyPrice = value;
         renderCostTable();
       } else {
-        priceStore[itemName][field] = parseFloat(value) || 0;
+        priceStore[itemName][field] = value === '' ? null : (parseFloat(value) || 0);
         updateCalculatedUI();
       }
       if (autoSave) saveToLocalStorage(true);
@@ -887,7 +907,7 @@
     function getEffectivePrice(itemName) {
       const itemData = priceStore[itemName];
       if (!itemData) return 0;
-      if (itemData.useBuyPrice) return itemData.buyPrice;
+      if (itemData.useBuyPrice) return itemData.buyPrice || 0;
 
       const recipe = recipes.find(r => getItemName(r) === itemName);
       if (recipe) {
@@ -898,7 +918,7 @@
         });
         return minCraft > 0 ? (totalCost / minCraft) : 0;
       }
-      return itemData.basePrice;
+      return itemData.basePrice || 0;
     }
 
     function updateCalculatedUI() {
@@ -1018,7 +1038,10 @@
           const ingCount = getIngCount(ing);
           const isCrafted = recipes.some(r => getItemName(r) === ingName);
           const ingPrice = getEffectivePrice(ingName);
-          const ingStore = priceStore[ingName] || { buyPrice: 0, useBuyPrice: false };
+          const ingStore = priceStore[ingName] || { basePrice: null, buyPrice: 0, useBuyPrice: false };
+
+          // 가격 미입력 시 테두리 강조 처리 (null 또는 undefined 또는 빈문자열일 때)
+          const isMissing = !isCrafted && (ingStore.basePrice === null || ingStore.basePrice === undefined || ingStore.basePrice === '');
 
           return `
             <tr class="${isCrafted ? 'bg-crafted' : 'bg-simple'}">
@@ -1082,6 +1105,20 @@
       if (autoSave) saveToLocalStorage(true);
     }
 
+    function clearAllOwnedItems() {
+      if (Object.keys(ownedItems).length === 0) {
+        showToast('보유 중인 품목이 없습니다.', 'info');
+        return;
+      }
+      if (confirm('보유 중인 모든 품목 수량을 0개로 초기화하시겠습니까?')) {
+        ownedItems = {};
+        renderOwnedOverview();
+        calculateMultiQuantity();
+        if (autoSave) saveToLocalStorage(true);
+        showToast('모든 보유 수량이 초기화되었습니다.', 'warn');
+      }
+    }
+
     function toggleItemReady(itemName, totalNeeded) {
       const currentOwned = ownedItems[itemName] || 0;
       if (currentOwned >= totalNeeded) {
@@ -1098,16 +1135,14 @@
       const container = document.getElementById('ownedGridContainer');
       if (!container) return;
 
-      // 1. 현재 선택된 제조품목과 해당 품목들의 모든 하위 재료 목록(Set) 수집
       let validMaterials = new Set();
       const validTargets = [...selectedSearchItems].filter(tName => (qtyTargetItems[tName] || 0) > 0);
 
       validTargets.forEach(tName => {
-        validMaterials.add(tName); // 본인(최상위 제조품목) 추가
-        getAllSubIngredients(tName).forEach(sub => validMaterials.add(sub)); // 모든 하위재료 추가
+        validMaterials.add(tName);
+        getAllSubIngredients(tName).forEach(sub => validMaterials.add(sub));
       });
 
-      // 2. 보유 중인 품목(수량 > 0) 중, 현재 계산 대상(validMaterials)에 속한 품목만 필터링
       const keys = Object.keys(ownedItems).filter(k => ownedItems[k] > 0 && validMaterials.has(k));
 
       if (keys.length === 0) {
@@ -1128,7 +1163,6 @@
       });
     }
 
-    /* 변경사항 반영: 2번 요청 제조수량 우측 1개당 계산 가격 표시 */
     function renderQtyTargetRows() {
       const container = document.getElementById('qtyTargetItemsContainer');
       if (!container) return;
@@ -1221,7 +1255,6 @@
       }
     }
 
-    /* 변경사항 반영: 1번 요청 제조수량 0 체크 로직 추가 */
     function calculateMultiQuantity() {
       const resultDiv = document.getElementById('quantityResult');
       if (!resultDiv) return;
@@ -1231,7 +1264,6 @@
         return;
       }
 
-      // 제조 수량이 0 초과인 유효한 품목만 필터링
       const validTargets = [...selectedSearchItems].filter(tName => (qtyTargetItems[tName] || 0) > 0);
 
       if (validTargets.length === 0) {
@@ -1328,7 +1360,7 @@
         return bFav - aFav;
       });
 
-      let html = `<h4>[다중 목표 제작 필요 목록 및 예상 비용 합산]</h4><b>합산 필요 재료 목록:</b><ul style="line-height: 2.1;">`;
+      let html = `<b>합산 필요 재료 목록:</b><ul style="line-height: 2.1;">`;
       for (const mat of sortedMaterials) {
         const totalNeeded = requiredMaterials[mat];
         const owned = ownedItems[mat] || 0;
@@ -1396,7 +1428,8 @@
         qtyTargets: qtyTargetItems
       }));
       localStorage.setItem(OWNED_STORAGE_KEY, JSON.stringify(ownedItems));
-      if (!isSilent) showToast('가격, 보유 수량 및 검색 데이터가 저장되었습니다.');
+      localStorage.setItem(AUTOSAVE_STORAGE_KEY, autoSave);
+      if (!isSilent) showToast('가격, 보유 수량 및 설정 데이터가 저장되었습니다.');
     }
 
     function loadLocalStorage() {
@@ -1423,6 +1456,11 @@
       if (ownedData) {
         try { ownedItems = JSON.parse(ownedData); } catch (e) {}
       }
+
+      const savedAutoSave = localStorage.getItem(AUTOSAVE_STORAGE_KEY);
+      if (savedAutoSave !== null) {
+        autoSave = savedAutoSave === 'true';
+      }
     }
 
     function clearLocalStorage() {
@@ -1432,12 +1470,18 @@
         localStorage.removeItem(SEARCH_STORAGE_KEY);
         localStorage.removeItem(TAB_STORAGE_KEY);
         localStorage.removeItem(OWNED_STORAGE_KEY);
+        localStorage.removeItem(AUTOSAVE_STORAGE_KEY);
         priceStore = {};
         favorites.clear();
         selectedSearchItems.clear();
         qtyTargetItems = {};
         ownedItems = {};
         expandedCraftItems.clear();
+        autoSave = false;
+        
+        const autoSaveEl = document.getElementById('autoSaveToggle');
+        if (autoSaveEl) autoSaveEl.checked = false;
+
         renderAllSearchTags();
         initPriceStore();
         renderCostTable();
