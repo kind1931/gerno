@@ -274,7 +274,7 @@
     .btn-delete { background-color: #64748b; }
     .btn-toggle { background-color: #8b5cf6; }
 
-    /* 추가 스타일: 보유 수량 및 준비완료 제어 */
+    /* 보유 수량 및 준비완료 스타일 */
     .owned-input-wrapper {
       display: inline-flex;
       align-items: center;
@@ -303,6 +303,31 @@
       color: #10b981;
       text-decoration: line-through;
     }
+
+    /* 보유수량 전용 섹션 스타일 */
+    .owned-overview-section {
+      background: #fff;
+      border: 1px solid #bbf7d0;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+    .owned-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .owned-chip {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 6px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.88em;
+    }
   </style>
 </head>
 <body>
@@ -317,8 +342,8 @@
 
     <div class="top-compact-tools">
       <label style="cursor:pointer; font-size: 0.85em;"><input type="checkbox" id="autoSaveToggle"> 자동 저장</label>
-      <button onclick="saveToLocalStorage()" class="btn btn-save" >저장</button>
-      <button onclick="clearLocalStorage()" class="btn btn-clear-all" >데이터초기화</button>
+      <button onclick="saveToLocalStorage()" class="btn btn-save">저장</button>
+      <button onclick="clearLocalStorage()" class="btn btn-clear-all">데이터초기화</button>
     </div>
   </div>
 
@@ -346,6 +371,7 @@
             <input type="text" id="costSearchInput" class="search-input" 
                 placeholder="품목 검색 (방향키/Enter 선택 가능)" 
                 onfocus="handleSearchFocus('costSearchInput', 'costSuggestionsList')"
+                onchange="handleSearchInput('costSearchInput', 'costSuggestionsList', this.value)" 
                 oninput="handleSearchInput('costSearchInput', 'costSuggestionsList', this.value)" 
                 onkeydown="handleSearchKeyDown(event, 'costSearchInput', 'costSuggestionsList')">
             <div id="costSuggestionsList" class="suggestions-list"></div>
@@ -378,22 +404,24 @@
   <!-- 탭 2: 제작 수량 -->
   <div id="quantityTab" class="tab-content">
     <h3>제작 필요 재료 및 비용 산출 (다중 항목 합산)</h3>
+    
+    
     <div style="margin-bottom: 15px;">
-      
       <div class="filter-section">
         <div class="search-box-container">
           <div class="search-input-wrapper">
             <input type="text" id="qtySearchInput" class="search-input" 
-                placeholder="수량 계산 품목 추가 검색 (방향키/Enter 가능)" 
-                onfocus="handleSearchFocus('qtySearchInput', 'qtySuggestionsList')"
-                oninput="handleSearchInput('qtySearchInput', 'qtySuggestionsList', this.value)" 
-                onkeydown="handleSearchKeyDown(event, 'qtySearchInput', 'qtySuggestionsList')">
+            placeholder="수량 계산 품목 추가 검색 (방향키/Enter 가능)" 
+            onfocus="handleSearchFocus('qtySearchInput', 'qtySuggestionsList')"
+            onchange="handleSearchInput('qtySearchInput', 'qtySuggestionsList', this.value)" 
+            oninput="handleSearchInput('qtySearchInput', 'qtySuggestionsList', this.value)" 
+            onkeydown="handleSearchKeyDown(event, 'qtySearchInput', 'qtySuggestionsList')">
             <div id="qtySuggestionsList" class="suggestions-list"></div>
           </div>
           <div id="qtySelectedTagsContainer" class="selected-tags"></div>
         </div>
       </div>
-
+      
       <div id="qtyTargetItemsContainer" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;"></div>
       
       <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; background: #fff; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
@@ -409,6 +437,14 @@
         </label>
       </div>
     </div>
+    <!-- 보유 수량 통합 관리 섹션 -->
+    <div id="ownedOverviewSection" class="owned-overview-section">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:bold; font-size:0.92em; color:#166534;">📦 보유 중인 모든 품목 수량 관리 (0개 초과 보유 품목):</span>
+        <small style="color:#666;">* 현재 화면에 분해되지 않아 표시되지 않는 품목 수량도 여기서 수정할 수 있습니다.</small>
+      </div>
+      <div id="ownedGridContainer" class="owned-grid"></div>
+    </div>
 
     <div id="quantityResult" class="result-box"></div>
   </div>
@@ -423,7 +459,7 @@
     
     let selectedSearchItems = new Set();
     let qtyTargetItems = {}; // { '품목명': 수량 }
-    let ownedItems = {};     // { '품목명': 보유수량 } 추가
+    let ownedItems = {};     // { '품목명': 보유수량 }
     let expandedCraftItems = new Set();
 
     let currentDecomposeMode = 'default';
@@ -541,9 +577,9 @@
       return depthMap;
     }
 
-    /* 상위 품목 중 준비완료 항목이 있는지 연쇄 확인하는 기능 추가 */
     function isAncestorReady(targetItem, requiredMap) {
-      for (const [parentName, recipe] of recipes.entries ? [] : recipes.map(r => [getItemName(r), r])) {
+      for (const recipe of recipes) {
+        const parentName = getItemName(recipe);
         if (recipe && recipe.ingredients) {
           const hasTargetAsIng = recipe.ingredients.some(ing => getItemName(ing) === targetItem);
           if (hasTargetAsIng) {
@@ -836,14 +872,16 @@
       });
     }
 
+    /* 포커스 아웃 문제 해결: 전체 테이블 재렌더링 대신 데이터만 업데이트 후 UI 부분 갱신 */
     function updatePrice(itemName, field, value) {
       if (!priceStore[itemName]) priceStore[itemName] = { basePrice: 0, buyPrice: 0, useBuyPrice: false };
+      
       if (field === 'useBuyPrice') {
         priceStore[itemName].useBuyPrice = value;
-        renderCostTable();
+        renderCostTable(); // 체크박스 상태 변동으로 인한 구조 변경 시에만 테이블 재렌더링
       } else {
         priceStore[itemName][field] = parseFloat(value) || 0;
-        updateCalculatedUI();
+        updateCalculatedUI(); // 값 입력 시에는 부분 업데이트로 포커스 유지
       }
       if (autoSave) saveToLocalStorage(true);
     }
@@ -997,9 +1035,9 @@
                     <label><input type="checkbox" ${ingStore.useBuyPrice ? 'checked' : ''} onchange="updatePrice('${ingName}', 'useBuyPrice', this.checked)"> 구매가 추종</label>
                   </div>
                 ` : `
-                  <input type="number" step="any" value="${ingStore.basePrice || ''}" placeholder="가격 입력" oninput="updatePrice('${ingName}', 'basePrice', this.value)"> 만냥
+                  <input type="number" step="any" value="${ingStore.basePrice || ''}" placeholder="가격 입력" onchange="updatePrice('${ingName}', 'basePrice', this.value)"> 만냥
                 `}
-                ${ingStore.useBuyPrice ? `<br><input type="number" step="any" style="margin-top:4px;" value="${ingStore.buyPrice || ''}" placeholder="구매가 입력" oninput="updatePrice('${ingName}', 'buyPrice', this.value)"> 만냥` : ''}
+                                ${ingStore.useBuyPrice ? `<br><input type="number" step="any" style="margin-top:4px;" value="${ingStore.buyPrice || ''}" placeholder="구매가 입력" onchange="updatePrice('${ingName}', 'buyPrice', this.value)"> 만냥` : ''}
               </td>
             </tr>
           `;
@@ -1016,7 +1054,7 @@
           <td id="total-cost-${safeId}">${formatCurrency(craftCostPerBatch)}</td>
           <td id="unit-cost-${safeId}"><b>${formatCurrency(unitCraftCost)}</b></td>
           <td>
-            <input type="number" step="any" value="${storeData.buyPrice || ''}" placeholder="구매가격" ${!storeData.useBuyPrice ? 'disabled' : ''} oninput="updatePrice('${name}', 'buyPrice', this.value)"> 만냥
+            <input type="number" step="any" value="${storeData.buyPrice || ''}" placeholder="구매가격" ${!storeData.useBuyPrice ? 'disabled' : ''} onchange="updatePrice('${name}', 'buyPrice', this.value)"> 만냥
             <div class="price-type-toggle">
               <label><input type="checkbox" ${storeData.useBuyPrice ? 'checked' : ''} onchange="updatePrice('${name}', 'useBuyPrice', this.checked)"> 구매가 추종</label>
             </div>
@@ -1039,7 +1077,12 @@
       } else {
         ownedItems[itemName] = num;
       }
-      calculateMultiQuantity();
+
+      // 상단 통합 섹션 입력창 목록만 별도로 갱신
+      renderOwnedOverview();
+
+      // 목록 전체를 새로 작성하지 않고 필요한 계산 및 상태 표시만 업데이트
+      calculateMultiQuantity(false); 
       if (autoSave) saveToLocalStorage(true);
     }
 
@@ -1050,8 +1093,33 @@
       } else {
         ownedItems[itemName] = totalNeeded;
       }
+      renderOwnedOverview();
       calculateMultiQuantity();
       if (autoSave) saveToLocalStorage(true);
+    }
+
+    /* 2번 요청 기능: 보이지 않는 보유 품목 전체를 확인 및 바로 수정할 수 있는 섹션 렌더링 */
+    function renderOwnedOverview() {
+      const container = document.getElementById('ownedGridContainer');
+      if (!container) return;
+
+      const keys = Object.keys(ownedItems).filter(k => ownedItems[k] > 0);
+      if (keys.length === 0) {
+        container.innerHTML = '<span style="color:#888; font-size:0.85em;">현재 보유 중으로 등록된 품목이 없습니다.</span>';
+        return;
+      }
+
+      container.innerHTML = '';
+      keys.sort().forEach(itemName => {
+        const chip = document.createElement('div');
+        chip.className = 'owned-chip';
+        chip.innerHTML = `
+          <b>${itemName}</b>: 
+          <input type="number" min="0" value="${ownedItems[itemName]}" style="width:65px; padding:2px 4px;" onchange="updateOwnedQty('${itemName}', this.value)"> 개
+          <button onclick="updateOwnedQty('${itemName}', 0)" style="border:none; background:none; color:#ef4444; font-weight:bold; cursor:pointer;">×</button>
+        `;
+        container.appendChild(chip);
+      });
     }
 
     function renderQtyTargetRows() {
@@ -1067,12 +1135,13 @@
         div.className = 'qty-item-card';
         div.innerHTML = `
           <b style="flex:1;">${name}</b>
-          <input type="number" value="${qty}" min="1" style="width:70px;" oninput="updateQtyTargetItem('${name}', this.value)"> 개
+          <input type="number" value="${qty}" min="1" style="width:70px;" onchange="updateQtyTargetItem('${name}', this.value)"> 개
           <button onclick="removeSearchItem('${name}')" style="color:red; cursor:pointer; border:none; background:none; font-weight:bold;">X</button>
         `;
         container.appendChild(div);
       });
 
+      renderOwnedOverview();
       calculateMultiQuantity();
     }
 
@@ -1143,7 +1212,7 @@
       }
     }
 
-    /* 수량 및 총 비용 계산 로직 (상위 준비완료 시 하위재료 차단 처리 적용) */
+    /* 수량 및 총 비용 계산 로직 (상위 품목 보유 및 하위 연동 반영) */
     function calculateMultiQuantity() {
       const resultDiv = document.getElementById('quantityResult');
       if (!resultDiv) return;
@@ -1160,7 +1229,7 @@
         const recipe = recipes.find(r => getItemName(r) === itemName);
         const shouldExpand = expandedCraftItems.has(itemName);
 
-        // 상위 재료가 준비 완료된 경우 하위로 분해 불가
+        // 상위 재료 충족 시 하위 분해 중단
         const parentReady = isAncestorReady(itemName, requiredMaterials);
 
         if (!recipe) {
@@ -1170,7 +1239,6 @@
           return;
         }
 
-        // 보유 수량 차감 후 실제 추가 제작이 필요한 수량 계산
         const currentOwned = ownedItems[itemName] || 0;
         const actualNeeded = Math.max(0, neededAmount - currentOwned);
 
@@ -1189,13 +1257,11 @@
           return;
         }
 
-        // 하위 항목 처리
         if (!shouldExpand || parentReady || actualNeeded === 0) {
           requiredMaterials[itemName] = (requiredMaterials[itemName] || 0) + neededAmount;
           return;
         }
 
-        // 하위 분해 진행 (실제 필요 수량 기준 계산)
         const minCraft = getItemCraftCount(recipe);
         const craftBatches = Math.ceil(actualNeeded / minCraft);
         const leftover = (craftBatches * minCraft) - actualNeeded;
@@ -1251,7 +1317,6 @@
         const actualNeeded = Math.max(0, totalNeeded - owned);
         const isReady = actualNeeded === 0;
 
-        // 상위 품목 준비완료 여부 확인
         const parentReady = isAncestorReady(mat, requiredMaterials);
         const isDecomposeDisabled = isReady || parentReady;
 
@@ -1267,7 +1332,7 @@
             <b>${mat}</b>: 총 ${totalNeeded.toLocaleString()}개 
             
             <span class="owned-input-wrapper">
-              (보유: <input type="number" min="0" value="${owned || ''}" placeholder="0" style="width: 65px; padding: 2px 4px;" oninput="updateOwnedQty('${mat}', this.value)"> 개)
+              (보유: <input type="number" min="0" value="${owned || ''}" placeholder="0" style="width: 65px; padding: 2px 4px;" onchange="updateOwnedQty('${mat}', this.value)"> 개)
               <button class="btn-ready ${isReady ? 'done' : ''}" onclick="toggleItemReady('${mat}', ${totalNeeded})">
                 ${isReady ? '✓ 준비완료' : '준비완료'}
               </button>
