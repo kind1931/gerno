@@ -40,7 +40,7 @@
     }
     h1 { margin-bottom: 10px; }
 
-    /* 상단 고정 컨테이너: Flex 적용으로 탭과 우측 도구를 한 줄로 배치 */
+    /* 상단 고정 컨테이너 */
     .sticky-header-container {
       position: sticky;
       top: 0;
@@ -49,8 +49,8 @@
       padding-top: 10px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-end; /* 탭 버튼 바닥선과 높이 맞춤 */
-      border-bottom: 2px solid #007bff; /* 탭과 라인 자연스럽게 연결 */
+      align-items: flex-end;
+      border-bottom: 2px solid #007bff;
     }
 
     .tab-buttons {
@@ -62,7 +62,7 @@
     .tab-btn {
       padding: 10px 20px;
       border: 1px solid #ccc;
-      border-bottom: none; /* 하단 테두리를 없애 연결감 부여 */
+      border-bottom: none;
       background: #e0e0e0;
       cursor: pointer;
       font-weight: bold;
@@ -75,12 +75,11 @@
       border-color: #007bff;
     }
 
-    /* 탭 우측 끝에 붙는 도구 박스 */
     .top-compact-tools {
       display: flex;
       gap: 8px;
       align-items: center;
-      margin-bottom: 5px; /* 탭 라인 수직 위치 맞춤 조정 */
+      margin-bottom: 5px;
       background: #fff;
       padding: 4px 8px;
       border-radius: 5px;
@@ -96,7 +95,6 @@
     }
     .tab-content.active { display: block; }
     
-    /* 필터 및 검색 레이아웃 */
     .filter-section {
       background: #f1f3f5;
       padding: 12px;
@@ -132,7 +130,6 @@
       cursor: not-allowed !important;
     }
 
-    /* 검색 UI 스타일 */
     .search-box-container {
       position: relative;
       display: flex;
@@ -205,11 +202,9 @@
     }
     .tag-close:hover { background: rgba(255,255,255,0.6); }
 
-    /* 즐겨찾기 별 버튼 */
     .star-btn { cursor: pointer; color: #ccc; font-size: 1.2em; user-select: none; margin-right: 4px; }
     .star-btn.active { color: #fbc02d; }
 
-    /* 테이블 스타일 */
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
     
@@ -254,7 +249,6 @@
       max-width: 450px;
     }
 
-    /* 토스트 스타일 */
     #toastContainer { position: fixed; bottom: 25px; right: 25px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
     .toast { min-width: 200px; padding: 12px 20px; background: #323232; color: #fff; border-radius: 6px; opacity: 0; transform: translateY(20px); transition: all 0.3s; }
     .toast.show { opacity: 1; transform: translateY(0); }
@@ -279,7 +273,36 @@
     .btn-clear-all { background-color: var(--danger); }
     .btn-delete { background-color: #64748b; }
     .btn-toggle { background-color: #8b5cf6; }
-    
+
+    /* 추가 스타일: 보유 수량 및 준비완료 제어 */
+    .owned-input-wrapper {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+    }
+    .btn-ready {
+      padding: 3px 8px;
+      font-size: 0.78em;
+      border: 1px solid #10b981;
+      background: #ecfdf5;
+      color: #047857;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-ready.done {
+      background: #10b981;
+      color: #fff;
+    }
+    .qty-needed-badge {
+      font-weight: bold;
+      color: #d32f2f;
+    }
+    .qty-completed {
+      color: #10b981;
+      text-decoration: line-through;
+    }
   </style>
 </head>
 <body>
@@ -292,7 +315,6 @@
       <button id="tabBtn-quantityTab" class="tab-btn" onclick="switchTab('quantityTab', this)">제작 수량</button>
     </div>
 
-    <!-- 탭 우측 끝에 위치할 compact 저장 도구 모음 -->
     <div class="top-compact-tools">
       <label style="cursor:pointer; font-size: 0.85em;"><input type="checkbox" id="autoSaveToggle"> 자동 저장</label>
       <button onclick="saveToLocalStorage()" class="btn btn-save" >저장</button>
@@ -318,7 +340,6 @@
         </div>
       </div>
 
-      <!-- 공통 검색 영역 (비용 탭) -->
       <div class="search-box-container">
         <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
           <div class="search-input-wrapper">
@@ -360,7 +381,6 @@
     <div style="margin-bottom: 15px;">
       
       <div class="filter-section">
-        <!-- 공통 검색 영역 (수량 탭) -->
         <div class="search-box-container">
           <div class="search-input-wrapper">
             <input type="text" id="qtySearchInput" class="search-input" 
@@ -374,7 +394,6 @@
         </div>
       </div>
 
-      <!-- 선택된 품목 목표 수량 조절 -->
       <div id="qtyTargetItemsContainer" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;"></div>
       
       <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; background: #fff; padding: 12px; border: 1px solid #ddd; border-radius: 6px;">
@@ -404,9 +423,10 @@
     
     let selectedSearchItems = new Set();
     let qtyTargetItems = {}; // { '품목명': 수량 }
-    let expandedCraftItems = new Set(); // 결과 목록에서 사용자가 개별 분해 체크한 제작품 세트
+    let ownedItems = {};     // { '품목명': 보유수량 } 추가
+    let expandedCraftItems = new Set();
 
-    let currentDecomposeMode = 'default'; // 'default', 'buyFollow', 'flat', 'custom'
+    let currentDecomposeMode = 'default';
 
     let showFavOnly = false;
     let autoSave = false;
@@ -416,8 +436,8 @@
     const FAV_STORAGE_KEY = 'craft_calculator_favs_v6';
     const SEARCH_STORAGE_KEY = 'craft_calculator_search_v6';
     const TAB_STORAGE_KEY = 'craft_calculator_active_tab_v6';
+    const OWNED_STORAGE_KEY = 'craft_calculator_owned_v6';
 
-    /* 금액 단위 단위 표현 포맷터 (만냥 단위 기준) */
     function formatCurrency(valInTenThousand) {
       if (valInTenThousand === 0 || isNaN(valInTenThousand)) return "0 만냥";
       
@@ -426,9 +446,9 @@
         return `${Number(valInTenThousand.toFixed(4)).toLocaleString()} 만냥`;
       }
 
-      const JO = 1000000000000n; // 1조 냥
-      const EOK = 100000000n;    // 1억 냥
-      const MAN = 10000n;       // 1만 냥
+      const JO = 1000000000000n;
+      const EOK = 100000000n;
+      const MAN = 10000n;
 
       let result = [];
       
@@ -530,7 +550,6 @@
         renderCategoryFilters();
         renderAllSearchTags();
         
-        // 새로고침 시 저장된 탭으로 활성화
         const savedTab = localStorage.getItem(TAB_STORAGE_KEY) || 'costTab';
         const targetBtn = document.getElementById(`tabBtn-${savedTab}`);
         if (targetBtn) {
@@ -665,38 +684,31 @@
       renderCostTable();
     }
 
-    // 1. 검색창 포커스 이벤트 처리 함수
     function handleSearchFocus(inputId, listId) {
       const input = document.getElementById(inputId);
       handleSearchInput(inputId, listId, input.value);
     }
 
-    // 2. 추천검색어 생성 및 정렬
     function handleSearchInput(inputId, listId, query) {
       const listContainer = document.getElementById(listId);
       const normQuery = normalizeStr(query);
       activeSuggestionIndex = -1;
 
-      // 이미 선택된(추가된) 품목 제외
       let availableRecipes = recipes.filter(r => !selectedSearchItems.has(getItemName(r)));
-
       let matches = [];
 
       if (!normQuery) {
-        // 💡 입력이 없을 때는 즐겨찾기 추가된 항목만 추천으로 표시
         matches = availableRecipes.filter(r => favorites.has(getItemName(r)));
       } else {
-        // 💡 검색어가 있을 때: 검색어를 포함하는 항목 필터링
         matches = availableRecipes.filter(r => normalizeStr(getItemName(r)).includes(normQuery));
 
-        // 💡 정렬: 즐겨찾기 항목 최상위 배치 -> 품목명 오름차순
         matches.sort((a, b) => {
           const aName = getItemName(a);
           const bName = getItemName(b);
           const aFav = favorites.has(aName) ? 1 : 0;
           const bFav = favorites.has(bName) ? 1 : 0;
 
-          if (aFav !== bFav) return bFav - aFav; // 즐겨찾기가 우선
+          if (aFav !== bFav) return bFav - aFav;
           return aName.localeCompare(bName);
         });
       }
@@ -714,7 +726,6 @@
         itemDiv.className = 'suggestion-item';
         itemDiv.dataset.index = idx;
         
-        // 즐겨찾기 항목에 ★ 표시 추가
         itemDiv.innerHTML = `${isFav ? '<span style="color:#fbc02d; font-weight:bold;">★ </span>' : ''}${name} ${m.job ? `<small style="color:#666;">[${m.job}]</small>` : ''}`;
         itemDiv.onclick = () => selectSearchItem(name, inputId, listId);
         listContainer.appendChild(itemDiv);
@@ -837,7 +848,7 @@
     function updateCalculatedUI() {
       document.querySelectorAll('[data-applied-price]').forEach(el => {
         const ingName = el.getAttribute('data-applied-price');
-        el.textContent = `적용가: ${formatCurrency(getEffectivePrice(ingName))}`;
+        el.textContent = `1개 당 적용가: ${formatCurrency(getEffectivePrice(ingName))}`;
       });
 
       recipes.filter(r => r.isMainItem !== false).forEach(item => {
@@ -961,13 +972,12 @@
               </td>
               <td>
                 ${isCrafted ? `
-                  <span data-applied-price="${ingName}">적용가: ${formatCurrency(ingPrice)}</span>
+                  <span data-applied-price="${ingName}">1개 당 적용가: ${formatCurrency(ingPrice)}</span>
                   <div class="price-type-toggle">
                     <label><input type="checkbox" ${ingStore.useBuyPrice ? 'checked' : ''} onchange="updatePrice('${ingName}', 'useBuyPrice', this.checked)"> 구매가 추종</label>
                   </div>
                 ` : `
                   <input type="number" step="any" value="${ingStore.basePrice || ''}" placeholder="가격 입력" oninput="updatePrice('${ingName}', 'basePrice', this.value)"> 만냥
-
                 `}
                 ${ingStore.useBuyPrice ? `<br><input type="number" step="any" style="margin-top:4px;" value="${ingStore.buyPrice || ''}" placeholder="구매가 입력" oninput="updatePrice('${ingName}', 'buyPrice', this.value)"> 만냥` : ''}
               </td>
@@ -1002,6 +1012,30 @@
       if (autoSave) saveToLocalStorage(true);
     }
 
+    /* 2. 보유 재료 수량 업데이트 기능 */
+    function updateOwnedQty(itemName, val) {
+      const num = parseInt(val) || 0;
+      if (num <= 0) {
+        delete ownedItems[itemName];
+      } else {
+        ownedItems[itemName] = num;
+      }
+      calculateMultiQuantity();
+      if (autoSave) saveToLocalStorage(true);
+    }
+
+    /* 2. 준비완료(자동 채우기) 토글 기능 */
+    function toggleItemReady(itemName, totalNeeded) {
+      const currentOwned = ownedItems[itemName] || 0;
+      if (currentOwned >= totalNeeded) {
+        delete ownedItems[itemName];
+      } else {
+        ownedItems[itemName] = totalNeeded;
+      }
+      calculateMultiQuantity();
+      if (autoSave) saveToLocalStorage(true);
+    }
+
     function renderQtyTargetRows() {
       const container = document.getElementById('qtyTargetItemsContainer');
       if (!container) return;
@@ -1024,7 +1058,6 @@
       calculateMultiQuantity();
     }
 
-    /* 하위재료 개별 토글 조작 시 즉시 계산 및 상단 라디오 상태 동기화 */
     function toggleItemExpand(itemName, checked) {
       if (checked) {
         expandedCraftItems.add(itemName);
@@ -1035,18 +1068,15 @@
       calculateMultiQuantity();
     }
 
-    /* 조회 방식 라디오 변경 시 분해 모드 업데이트 */
     function onModeRadioChange(mode) {
       currentDecomposeMode = mode;
       expandedCraftItems.clear();
 
       if (mode === 'flat') {
-        // 모든 제작품을 개별 분해 세트에 등록
         recipes.forEach(r => {
           expandedCraftItems.add(getItemName(r));
         });
       } else if (mode === 'buyFollow') {
-        // 구매가 추종이 설정되어 있지 않은 제작품만 분해 세트에 등록
         recipes.forEach(r => {
           const name = getItemName(r);
           const hasBuyPrice = !!priceStore[name]?.useBuyPrice;
@@ -1055,11 +1085,9 @@
           }
         });
       }
-      // 'default' 시 expandedCraftItems는 클리어 상태 유지
       calculateMultiQuantity();
     }
 
-    /* 현재 결과에 표시된 모든 하위 제작품의 분해 상태 동기화 검사 */
     function syncRadioStateWithExpandedItems() {
       let currentCraftableSubItems = new Set();
       
@@ -1097,6 +1125,7 @@
       }
     }
 
+    /* 수량 및 총 비용 계산 로직 */
     function calculateMultiQuantity() {
       const resultDiv = document.getElementById('quantityResult');
       if (!resultDiv) return;
@@ -1154,6 +1183,7 @@
         processCraft(tName, qty, true);
       });
 
+      /* 3. 총 비용 계산은 기존 유닛 단가 로직 유지 */
       let totalCraftCostSum = 0;
       let totalBuyPriceSum = 0;
 
@@ -1166,7 +1196,6 @@
         totalBuyPriceSum += buyPrice * qty;
       });
 
-      // 정렬 조건 적용 (검색 연관 우선 -> 트리 깊이 순 -> 즐겨찾기) *이름 정렬 제외*
       let targetSearchSet = new Set();
       selectedSearchItems.forEach(item => {
         getAllSubIngredients(item).forEach(sub => targetSearchSet.add(sub));
@@ -1187,28 +1216,41 @@
         return bFav - aFav;
       });
 
-      let html = `<h4>[다중 목표 제작 필요 목록 및 예상 비용 합산]</h4><b>합산 필요 재료 목록:</b><ul style="line-height: 1.8;">`;
+      let html = `<h4>[다중 목표 제작 필요 목록 및 예상 비용 합산]</h4><b>합산 필요 재료 목록:</b><ul style="line-height: 2.1;">`;
       for (const mat of sortedMaterials) {
-        const qty = requiredMaterials[mat];
+        const totalNeeded = requiredMaterials[mat];
+        const owned = ownedItems[mat] || 0;
+        const actualNeeded = Math.max(0, totalNeeded - owned);
+        const isReady = actualNeeded === 0;
+
         const isCrafted = recipes.some(r => getItemName(r) === mat);
         const effPrice = getEffectivePrice(mat);
-        const buyPrice = priceStore[mat]?.buyPrice || 0;
-
-        const itemCraftTotal = effPrice * qty;
-        const itemBuyTotal = buyPrice * qty;
+        const unitBuyPrice = priceStore[mat]?.buyPrice || 0;
 
         const isExpanded = expandedCraftItems.has(mat);
 
         html += `
           <li>
             <span class="badge ${isCrafted ? 'badge-crafted' : 'badge-simple'}">${isCrafted ? '제작품' : '기본재료'}</span> 
-            <b>${mat}</b>: ${qty.toLocaleString()}개 
+            <b>${mat}</b>: 총 ${totalNeeded.toLocaleString()}개 
+            
+            <span class="owned-input-wrapper">
+              (보유: <input type="number" min="0" value="${owned || ''}" placeholder="0" style="width: 65px; padding: 2px 4px;" oninput="updateOwnedQty('${mat}', this.value)"> 개)
+              <button class="btn-ready ${isReady ? 'done' : ''}" onclick="toggleItemReady('${mat}', ${totalNeeded})">
+                ${isReady ? '✓ 준비완료' : '준비완료'}
+              </button>
+            </span>
+
+            👉 <span class="${isReady ? 'qty-completed' : 'qty-needed-badge'}">
+              ${isReady ? '필요 수량 충족됨' : `추가 필요: ${actualNeeded.toLocaleString()}개`}
+            </span>
+
             ${isCrafted ? `
               <label style="margin-left:8px; font-size:0.85em; cursor:pointer; color:#d32f2f;">
                 <input type="checkbox" ${isExpanded ? 'checked' : ''} onchange="toggleItemExpand('${mat}', this.checked)"> 하위재료 분해
               </label>
             ` : ''}
-            <small style="color:#555; margin-left:6px;">(적용가: ${formatCurrency(itemCraftTotal)} ${buyPrice > 0 ? `/ 구매비: ${formatCurrency(itemBuyTotal)}` : ''})</small>
+            <small style="color:#555; margin-left:6px;">(1개당 적용가: ${formatCurrency(effPrice)}${unitBuyPrice > 0 ? ` / 1개당 구매가: ${formatCurrency(unitBuyPrice)}` : ''})</small>
           </li>
         `;
       }
@@ -1232,14 +1274,14 @@
       resultDiv.innerHTML = html;
     }
 
-    /* 로컬스토리지 저장 및 불러오기 확장 */
     function saveToLocalStorage(isSilent = false) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(priceStore));
       localStorage.setItem(SEARCH_STORAGE_KEY, JSON.stringify({
         selectedItems: [...selectedSearchItems],
         qtyTargets: qtyTargetItems
       }));
-      if (!isSilent) showToast('가격 및 검색 데이터가 저장되었습니다.');
+      localStorage.setItem(OWNED_STORAGE_KEY, JSON.stringify(ownedItems));
+      if (!isSilent) showToast('가격, 보유 수량 및 검색 데이터가 저장되었습니다.');
     }
 
     function loadLocalStorage() {
@@ -1261,18 +1303,25 @@
           }
         } catch (e) {}
       }
+
+      const ownedData = localStorage.getItem(OWNED_STORAGE_KEY);
+      if (ownedData) {
+        try { ownedItems = JSON.parse(ownedData); } catch (e) {}
+      }
     }
 
     function clearLocalStorage() {
-      if (confirm('저장된 가격, 즐겨찾기 및 검색 항목 정보를 초기화하시겠습니까?')) {
+      if (confirm('저장된 가격, 즐겨찾기, 보유수량 및 검색 항목 정보를 초기화하시겠습니까?')) {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(FAV_STORAGE_KEY);
         localStorage.removeItem(SEARCH_STORAGE_KEY);
         localStorage.removeItem(TAB_STORAGE_KEY);
+        localStorage.removeItem(OWNED_STORAGE_KEY);
         priceStore = {};
         favorites.clear();
         selectedSearchItems.clear();
         qtyTargetItems = {};
+        ownedItems = {};
         expandedCraftItems.clear();
         renderAllSearchTags();
         initPriceStore();
