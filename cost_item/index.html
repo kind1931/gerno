@@ -541,6 +541,26 @@
       return depthMap;
     }
 
+    /* 상위 품목 중 준비완료 항목이 있는지 연쇄 확인하는 기능 추가 */
+    function isAncestorReady(targetItem, requiredMap) {
+      for (const [parentName, recipe] of recipes.entries ? [] : recipes.map(r => [getItemName(r), r])) {
+        if (recipe && recipe.ingredients) {
+          const hasTargetAsIng = recipe.ingredients.some(ing => getItemName(ing) === targetItem);
+          if (hasTargetAsIng) {
+            const parentTotal = requiredMap[parentName] || 0;
+            const parentOwned = ownedItems[parentName] || 0;
+            if (parentTotal > 0 && parentOwned >= parentTotal) {
+              return true;
+            }
+            if (isAncestorReady(parentName, requiredMap)) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       loadLocalStorage();
 
@@ -1012,7 +1032,6 @@
       if (autoSave) saveToLocalStorage(true);
     }
 
-    /* 2. 보유 재료 수량 업데이트 기능 */
     function updateOwnedQty(itemName, val) {
       const num = parseInt(val) || 0;
       if (num <= 0) {
@@ -1024,7 +1043,6 @@
       if (autoSave) saveToLocalStorage(true);
     }
 
-    /* 2. 준비완료(자동 채우기) 토글 기능 */
     function toggleItemReady(itemName, totalNeeded) {
       const currentOwned = ownedItems[itemName] || 0;
       if (currentOwned >= totalNeeded) {
@@ -1125,7 +1143,7 @@
       }
     }
 
-    /* 수량 및 총 비용 계산 로직 */
+    /* 수량 및 총 비용 계산 로직 (상위 준비완료 시 하위재료 차단 처리 적용) */
     function calculateMultiQuantity() {
       const resultDiv = document.getElementById('quantityResult');
       if (!resultDiv) return;
@@ -1142,6 +1160,9 @@
         const recipe = recipes.find(r => getItemName(r) === itemName);
         const shouldExpand = expandedCraftItems.has(itemName);
 
+        // 상위 재료가 준비 완료된 경우 하위로 분해 불가
+        const parentReady = isAncestorReady(itemName, requiredMaterials);
+
         if (!recipe) {
           if (!isRootTarget) {
             requiredMaterials[itemName] = (requiredMaterials[itemName] || 0) + neededAmount;
@@ -1156,13 +1177,17 @@
 
           if (leftover > 0) leftoverMaterials[itemName] = (leftoverMaterials[itemName] || 0) + leftover;
 
-          (recipe.ingredients || []).forEach(ing => {
-            processCraft(getItemName(ing), getIngCount(ing) * craftBatches, false);
-          });
+          // 루트 품목 자체의 보유량이 충족된 경우에도 하위 재료 분해 차단
+          const rootOwned = ownedItems[itemName] || 0;
+          if (rootOwned < neededAmount) {
+            (recipe.ingredients || []).forEach(ing => {
+              processCraft(getItemName(ing), getIngCount(ing) * craftBatches, false);
+            });
+          }
           return;
         }
 
-        if (!shouldExpand) {
+        if (!shouldExpand || parentReady) {
           requiredMaterials[itemName] = (requiredMaterials[itemName] || 0) + neededAmount;
           return;
         }
@@ -1173,9 +1198,15 @@
 
         if (leftover > 0) leftoverMaterials[itemName] = (leftoverMaterials[itemName] || 0) + leftover;
 
-        (recipe.ingredients || []).forEach(ing => {
-          processCraft(getItemName(ing), getIngCount(ing) * craftBatches, false);
-        });
+        // 자신의 보유수량이 필요수량 이상인 경우 하위 재료 분해 중단
+        const currentOwned = ownedItems[itemName] || 0;
+        if (currentOwned < neededAmount) {
+          (recipe.ingredients || []).forEach(ing => {
+            processCraft(getItemName(ing), getIngCount(ing) * craftBatches, false);
+          });
+        } else {
+          requiredMaterials[itemName] = (requiredMaterials[itemName] || 0) + neededAmount;
+        }
       }
 
       selectedSearchItems.forEach(tName => {
@@ -1183,7 +1214,6 @@
         processCraft(tName, qty, true);
       });
 
-      /* 3. 총 비용 계산은 기존 유닛 단가 로직 유지 */
       let totalCraftCostSum = 0;
       let totalBuyPriceSum = 0;
 
@@ -1223,11 +1253,15 @@
         const actualNeeded = Math.max(0, totalNeeded - owned);
         const isReady = actualNeeded === 0;
 
+        // 상위 품목 준비완료 여부 확인
+        const parentReady = isAncestorReady(mat, requiredMaterials);
+        const isDecomposeDisabled = isReady || parentReady;
+
         const isCrafted = recipes.some(r => getItemName(r) === mat);
         const effPrice = getEffectivePrice(mat);
         const unitBuyPrice = priceStore[mat]?.buyPrice || 0;
 
-        const isExpanded = expandedCraftItems.has(mat);
+        const isExpanded = expandedCraftItems.has(mat) && !isDecomposeDisabled;
 
         html += `
           <li>
@@ -1246,8 +1280,8 @@
             </span>
 
             ${isCrafted ? `
-              <label style="margin-left:8px; font-size:0.85em; cursor:pointer; color:#d32f2f;">
-                <input type="checkbox" ${isExpanded ? 'checked' : ''} onchange="toggleItemExpand('${mat}', this.checked)"> 하위재료 분해
+              <label style="margin-left:8px; font-size:0.85em; cursor:${isDecomposeDisabled ? 'not-allowed' : 'pointer'}; color:${isDecomposeDisabled ? '#999' : '#d32f2f'};" ${isDecomposeDisabled ? 'title="상위 또는 본인이 준비완료되어 하위재료를 분해할 수 없습니다."' : ''}>
+                <input type="checkbox" ${isExpanded ? 'checked' : ''} ${isDecomposeDisabled ? 'disabled' : ''} onchange="toggleItemExpand('${mat}', this.checked)"> 하위재료 분해
               </label>
             ` : ''}
             <small style="color:#555; margin-left:6px;">(1개당 적용가: ${formatCurrency(effPrice)}${unitBuyPrice > 0 ? ` / 1개당 구매가: ${formatCurrency(unitBuyPrice)}` : ''})</small>
