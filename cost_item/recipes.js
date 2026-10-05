@@ -1350,27 +1350,6 @@ const defaultRecipes = [
     ]
   },
   {
-    "job": "강화",
-    "required_level": "-",
-    "item_name": "세공된 적마노(강화)",
-    "yield": "-",
-    "crafting_fee": "100만",
-    "ingredients": [
-      {
-        "name": "적마노",
-        "quantity": "5개"
-      },
-      {
-        "name": "힘의기억",
-        "quantity": "5개"
-      },
-      {
-        "name": "기억의서판(火)",
-        "quantity": "2개"
-      }
-    ]
-  },
-  {
     "job": "세공사",
     "required_level": "250",
     "item_name": "세공된 남옥",
@@ -1392,27 +1371,6 @@ const defaultRecipes = [
       {
         "name": "성스러운별(風)",
         "quantity": "10개"
-      }
-    ]
-  },
-  {
-    "job": "강화",
-    "required_level": "-",
-    "item_name": "세공된 남옥(강화)",
-    "yield": "-",
-    "crafting_fee": "100만",
-    "ingredients": [
-      {
-        "name": "남옥",
-        "quantity": "5개"
-      },
-      {
-        "name": "힘의기억",
-        "quantity": "5개"
-      },
-      {
-        "name": "기억의서판(風)",
-        "quantity": "2개"
       }
     ]
   },
@@ -1442,27 +1400,6 @@ const defaultRecipes = [
     ]
   },
   {
-    "job": "강화",
-    "required_level": "-",
-    "item_name": "세공된 석웅황(강화)",
-    "yield": "-",
-    "crafting_fee": "100만",
-    "ingredients": [
-      {
-        "name": "석웅황",
-        "quantity": "5개"
-      },
-      {
-        "name": "힘의기억",
-        "quantity": "5개"
-      },
-      {
-        "name": "기억의서판(雷)",
-        "quantity": "2개"
-      }
-    ]
-  },
-  {
     "job": "세공사",
     "required_level": "250",
     "item_name": "세공된 벽옥",
@@ -1484,27 +1421,6 @@ const defaultRecipes = [
       {
         "name": "성스러운별(水)",
         "quantity": "10개"
-      }
-    ]
-  },
-  {
-    "job": "강화",
-    "required_level": "-",
-    "item_name": "세공된 벽옥(강화)",
-    "yield": "-",
-    "crafting_fee": "100만",
-    "ingredients": [
-      {
-        "name": "벽옥",
-        "quantity": "5개"
-      },
-      {
-        "name": "힘의기억",
-        "quantity": "5개"
-      },
-      {
-        "name": "기억의서판(水)",
-        "quantity": "2개"
       }
     ]
   },
@@ -2025,7 +1941,90 @@ const defaultRecipes = [
       }
     ]
   },
-  
+  {
+    "job": "강화",
+    "required_level": "-",
+    "item_name": "세공된 석웅황(강화)",
+    "yield": "-",
+    "crafting_fee": "100만",
+    "ingredients": [
+      {
+        "name": "석웅황",
+        "quantity": "5개"
+      },
+      {
+        "name": "힘의기억",
+        "quantity": "5개"
+      },
+      {
+        "name": "기억의서판(雷)",
+        "quantity": "2개"
+      }
+    ]
+  },
+  {
+    "job": "강화",
+    "required_level": "-",
+    "item_name": "세공된 적마노(강화)",
+    "yield": "-",
+    "crafting_fee": "100만",
+    "ingredients": [
+      {
+        "name": "적마노",
+        "quantity": "5개"
+      },
+      {
+        "name": "힘의기억",
+        "quantity": "5개"
+      },
+      {
+        "name": "기억의서판(火)",
+        "quantity": "2개"
+      }
+    ]
+  },
+  {
+    "job": "강화",
+    "required_level": "-",
+    "item_name": "세공된 남옥(강화)",
+    "yield": "-",
+    "crafting_fee": "100만",
+    "ingredients": [
+      {
+        "name": "남옥",
+        "quantity": "5개"
+      },
+      {
+        "name": "힘의기억",
+        "quantity": "5개"
+      },
+      {
+        "name": "기억의서판(風)",
+        "quantity": "2개"
+      }
+    ]
+  },
+  {
+    "job": "강화",
+    "required_level": "-",
+    "item_name": "세공된 벽옥(강화)",
+    "yield": "-",
+    "crafting_fee": "100만",
+    "ingredients": [
+      {
+        "name": "벽옥",
+        "quantity": "5개"
+      },
+      {
+        "name": "힘의기억",
+        "quantity": "5개"
+      },
+      {
+        "name": "기억의서판(水)",
+        "quantity": "2개"
+      }
+    ]
+  },
 ]
 
 // HTML의 초기화 함수가 선언되어 있다면 즉시 전달
