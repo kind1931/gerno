@@ -1255,7 +1255,7 @@
       }
     }
 
-    function calculateMultiQuantity() {
+function calculateMultiQuantity() {
       const resultDiv = document.getElementById('quantityResult');
       if (!resultDiv) return;
 
@@ -1360,6 +1360,9 @@
         return bFav - aFav;
       });
 
+      // 현재 시점 보유 수량을 제외하고 추가로 필요한 총 금액 계산
+      let additionalCraftCostSum = 0;
+
       let html = `<b>합산 필요 재료 목록:</b><ul style="line-height: 2.1;">`;
       for (const mat of sortedMaterials) {
         const totalNeeded = requiredMaterials[mat];
@@ -1373,6 +1376,9 @@
         const isCrafted = recipes.some(r => getItemName(r) === mat);
         const effPrice = getEffectivePrice(mat);
         const unitBuyPrice = priceStore[mat]?.buyPrice || 0;
+
+        // 추가 필요 금액 누적
+        additionalCraftCostSum += effPrice * actualNeeded;
 
         const isExpanded = expandedCraftItems.has(mat) && !isDecomposeDisabled;
 
@@ -1413,8 +1419,11 @@
 
       html += `
         <div style="margin-top: 15px; padding-top: 10px; border-top: 2px dashed #007bff; font-size: 1.05em;">
-          <b>💰 예상 총 제작 비용:</b> <span style="color:#d32f2f; font-weight:bold;">${formatCurrency(totalCraftCostSum)}</span><br>
-          ${totalBuyPriceSum > 0 ? `<b>🏷 예상 총 구매 비용:</b> <span style="color:#1976d2; font-weight:bold;">${formatCurrency(totalBuyPriceSum)}</span>` : ''}
+          <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
+            <div><b>💰 예상 총 제작 비용:</b> <span style="color:#d32f2f; font-weight:bold;">${formatCurrency(totalCraftCostSum)}</span></div>
+            <div><b>🛍 현재 추가 필요 금액:</b> <span style="color:#2563eb; font-weight:bold;">${formatCurrency(additionalCraftCostSum)}</span></div>
+          </div>
+          ${totalBuyPriceSum > 0 ? `<div style="margin-top: 4px;"><b>🏷 예상 총 구매 비용:</b> <span style="color:#1976d2; font-weight:bold;">${formatCurrency(totalBuyPriceSum)}</span></div>` : ''}
         </div>
       `;
 
