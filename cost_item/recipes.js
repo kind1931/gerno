@@ -1256,7 +1256,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "245",
-    "item_name": "항아목걸이",
+    "item_name": "항아의목걸이",
     "yield": "1개",
     "crafting_fee": "1억",
     "ingredients": [
@@ -1285,7 +1285,7 @@ const defaultRecipes = [
   {
     "job": "세공사",
     "required_level": "245",
-    "item_name": "항아귀걸이",
+    "item_name": "항아의귀걸이",
     "yield": "1개",
     "crafting_fee": "1억",
     "ingredients": [
