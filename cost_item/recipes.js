@@ -901,7 +901,7 @@ const defaultRecipes = [
     "required_level": "165",
     "item_name": "강화된 백수정",
     "yield": "1개",
-    "crafting_fee": "1,000만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "세공된 백수정",
@@ -926,7 +926,7 @@ const defaultRecipes = [
     "required_level": "170",
     "item_name": "강화된 사금석",
     "yield": "1개",
-    "crafting_fee": "1,000만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "세공된 사금석",
@@ -951,7 +951,7 @@ const defaultRecipes = [
     "required_level": "175",
     "item_name": "강화된 월장석",
     "yield": "1개",
-    "crafting_fee": "2,000만",
+    "crafting_fee": "2000만",
     "ingredients": [
       {
         "name": "세공된 월장석",
@@ -976,7 +976,7 @@ const defaultRecipes = [
     "required_level": "180",
     "item_name": "강화된 적혈석",
     "yield": "1개",
-    "crafting_fee": "3,000만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "세공된 적혈석",
@@ -1001,7 +1001,7 @@ const defaultRecipes = [
     "required_level": "195",
     "item_name": "악령지환",
     "yield": "1개",
-    "crafting_fee": "3,000만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "강화된 백수정",
@@ -1030,7 +1030,7 @@ const defaultRecipes = [
     "required_level": "195",
     "item_name": "공명의반지",
     "yield": "1개",
-    "crafting_fee": "3,000만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "강화된 적혈석",
@@ -1059,7 +1059,7 @@ const defaultRecipes = [
     "required_level": "195",
     "item_name": "사금석반지",
     "yield": "1개",
-    "crafting_fee": "3,000만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "강화된 사금석",
@@ -1117,7 +1117,7 @@ const defaultRecipes = [
     "required_level": "215",
     "item_name": "황룡금침",
     "yield": "1개",
-    "crafting_fee": "3,000만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "빙백침",
@@ -1146,7 +1146,7 @@ const defaultRecipes = [
     "required_level": "220",
     "item_name": "청룡의요대",
     "yield": "1개",
-    "crafting_fee": "3,000만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "강화된 월장석",
@@ -1175,7 +1175,7 @@ const defaultRecipes = [
     "required_level": "235",
     "item_name": "오색결정",
     "yield": "1개",
-    "crafting_fee": "1,000만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "오색결정 조각",
@@ -1200,7 +1200,7 @@ const defaultRecipes = [
     "required_level": "245",
     "item_name": "여와목걸이",
     "yield": "1개",
-    "crafting_fee": "5,000만",
+    "crafting_fee": "5000만",
     "ingredients": [
       {
         "name": "반고의목걸이(+5)",
@@ -1229,7 +1229,7 @@ const defaultRecipes = [
     "required_level": "245",
     "item_name": "여와귀걸이",
     "yield": "1개",
-    "crafting_fee": "5,000만",
+    "crafting_fee": "5000만",
     "ingredients": [
       {
         "name": "반고의귀걸이(+5)",
@@ -1316,7 +1316,7 @@ const defaultRecipes = [
     "required_level": "250",
     "item_name": "세공된 적마노",
     "yield": "-",
-    "crafting_fee": "1,000만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "적마노",
@@ -1341,7 +1341,7 @@ const defaultRecipes = [
     "required_level": "250",
     "item_name": "세공된 남옥",
     "yield": "-",
-    "crafting_fee": "1,000만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "남옥",
@@ -1366,7 +1366,7 @@ const defaultRecipes = [
     "required_level": "250",
     "item_name": "세공된 석웅황",
     "yield": "-",
-    "crafting_fee": "1,000만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "석웅황",
@@ -1391,7 +1391,7 @@ const defaultRecipes = [
     "required_level": "250",
     "item_name": "세공된 벽옥",
     "yield": "-",
-    "crafting_fee": "1,000만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "벽옥",
@@ -1475,7 +1475,7 @@ const defaultRecipes = [
     "required_level": "145렙",
     "item_name": "철제죔쇄",
     "yield": "2개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "철괴",
@@ -1496,7 +1496,7 @@ const defaultRecipes = [
     "required_level": "150렙",
     "item_name": "흑철괴",
     "yield": "30개",
-    "crafting_fee": "5백만",
+    "crafting_fee": "500만",
     "ingredients": [
       {
         "name": "철괴",
@@ -1517,7 +1517,7 @@ const defaultRecipes = [
     "required_level": "150렙",
     "item_name": "예래의곡괭이",
     "yield": "1개",
-    "crafting_fee": "5백만",
+    "crafting_fee": "500만",
     "ingredients": [
       {
         "name": "흑철괴",
@@ -1538,7 +1538,7 @@ const defaultRecipes = [
     "required_level": "150렙",
     "item_name": "한채의호미",
     "yield": "1개",
-    "crafting_fee": "5백만",
+    "crafting_fee": "500만",
     "ingredients": [
       {
         "name": "흑철괴",
@@ -1559,7 +1559,7 @@ const defaultRecipes = [
     "required_level": "165렙",
     "item_name": "청룡언월도",
     "yield": "1개",
-    "crafting_fee": "2천만",
+    "crafting_fee": "2000만",
     "ingredients": [
       {
         "name": "흑철괴",
@@ -1588,7 +1588,7 @@ const defaultRecipes = [
     "required_level": "170렙",
     "item_name": "거한의도끼",
     "yield": "1개",
-    "crafting_fee": "2천만",
+    "crafting_fee": "2000만",
     "ingredients": [
       {
         "name": "흑철괴",
@@ -1617,7 +1617,7 @@ const defaultRecipes = [
     "required_level": "175렙",
     "item_name": "늑대의조도",
     "yield": "1개",
-    "crafting_fee": "2천만",
+    "crafting_fee": "2000만",
     "ingredients": [
       {
         "name": "흑철괴",
@@ -1646,7 +1646,7 @@ const defaultRecipes = [
     "required_level": "180렙",
     "item_name": "자룡극",
     "yield": "1개",
-    "crafting_fee": "3천만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "흑철괴",
@@ -1704,7 +1704,7 @@ const defaultRecipes = [
     "required_level": "190렙",
     "item_name": "후마표창",
     "yield": "1개",
-    "crafting_fee": "4천만",
+    "crafting_fee": "4000만",
     "ingredients": [
       {
         "name": "흑철괴",
@@ -1733,7 +1733,7 @@ const defaultRecipes = [
     "required_level": "195렙",
     "item_name": "자령부",
     "yield": "1개",
-    "crafting_fee": "5천만",
+    "crafting_fee": "5000만",
     "ingredients": [
       {
         "name": "흑철괴",
@@ -1762,7 +1762,7 @@ const defaultRecipes = [
     "required_level": "195렙",
     "item_name": "흑철주괴",
     "yield": "20개",
-    "crafting_fee": "5백만",
+    "crafting_fee": "500만",
     "ingredients": [
       {
         "name": "흑철괴",
@@ -1787,7 +1787,7 @@ const defaultRecipes = [
     "required_level": "205렙",
     "item_name": "흑웅의갈퀴",
     "yield": "1개",
-    "crafting_fee": "2천만",
+    "crafting_fee": "2000만",
     "ingredients": [
       {
         "name": "흑철주괴",
@@ -1816,7 +1816,7 @@ const defaultRecipes = [
     "required_level": "215렙",
     "item_name": "대장군포",
     "yield": "1개",
-    "crafting_fee": "3천만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "차승자총통",
@@ -1845,7 +1845,7 @@ const defaultRecipes = [
     "required_level": "215렙",
     "item_name": "빛나는 철제죔쇄",
     "yield": "1개",
-    "crafting_fee": "3천만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "철제죔쇄",
@@ -1870,7 +1870,7 @@ const defaultRecipes = [
     "required_level": "215렙",
     "item_name": "철마의편자",
     "yield": "1개",
-    "crafting_fee": "3천만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "청동심장",
@@ -1895,7 +1895,7 @@ const defaultRecipes = [
     "required_level": "235렙",
     "item_name": "땅의 속성 주괴",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "땅의원석",
@@ -1969,7 +1969,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "잿빛 공포의 보옥",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "핏빛 공포의 보옥",
@@ -1994,7 +1994,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "울부짖는 사암의 심장",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "울부짖는 환염의 심장",
@@ -2135,7 +2135,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "적운혼",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "심연의 불안정한 정기",
@@ -2156,7 +2156,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "녹영혼",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "심연의 불안정한 정기",
@@ -2177,7 +2177,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "청명혼",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "심연의 불안정한 정기",
@@ -2198,7 +2198,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "금령혼",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "심연의 불안정한 정기",
@@ -2486,7 +2486,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "영혼이 봉인된 호리병",
     "yield": "1개",
-    "crafting_fee": "3,000만",
+    "crafting_fee": "3000만",
     "ingredients": [
       {
         "name": "철괴리의호리병",
@@ -2950,7 +2950,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "악몽의결정체(土)",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "악몽의결정체(水)",
@@ -2975,7 +2975,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "사원서판",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "기억의서판(火)",
@@ -3402,7 +3402,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "안행진",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "심연의정수",
@@ -3571,7 +3571,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "불의진법",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "심연의정수",
@@ -3596,7 +3596,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "물의진법",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "심연의정수",
@@ -3621,7 +3621,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "바람의진법",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "심연의정수",
@@ -3646,7 +3646,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "뇌의진법",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "심연의정수",
@@ -7129,7 +7129,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "먹으로 그려진 깃털(거래불가)",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "솔거의 붓(거래불가)",
@@ -7142,7 +7142,7 @@ const defaultRecipes = [
     "required_level": "-",
     "item_name": "힘이 담긴 솔거의 그림(거래불가)",
     "yield": "1개",
-    "crafting_fee": "1천만",
+    "crafting_fee": "1000만",
     "ingredients": [
       {
         "name": "정제된 도깨비의 불(거래불가)",
