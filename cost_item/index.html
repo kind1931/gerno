@@ -1320,6 +1320,7 @@ function calculateMultiQuantity() {
 
       let requiredMaterials = {};
       let leftoverMaterials = {};
+      let requiredFees = {}; // 항목별 총 발생 수수료 저장을 위한 객체 추가
 
       function processCraft(itemName, neededAmount, isRootTarget) {
         const recipe = recipes.find(r => getItemName(r) === itemName);
@@ -1343,6 +1344,12 @@ function calculateMultiQuantity() {
             const craftBatches = Math.ceil(actualNeeded / minCraft);
             const leftover = (craftBatches * minCraft) - actualNeeded;
 
+            // 수수료 집계
+            const fee = getItemFee(recipe);
+            if (fee > 0) {
+              requiredFees[itemName] = (requiredFees[itemName] || 0) + (fee * craftBatches);
+            }
+
             if (leftover > 0) leftoverMaterials[itemName] = (leftoverMaterials[itemName] || 0) + leftover;
 
             (recipe.ingredients || []).forEach(ing => {
@@ -1360,6 +1367,12 @@ function calculateMultiQuantity() {
         const minCraft = getItemCraftCount(recipe);
         const craftBatches = Math.ceil(actualNeeded / minCraft);
         const leftover = (craftBatches * minCraft) - actualNeeded;
+
+        // 하위재료 분해 시 상위 재료 제작 수수료 집계
+        const fee = getItemFee(recipe);
+        if (fee > 0) {
+          requiredFees[itemName] = (requiredFees[itemName] || 0) + (fee * craftBatches);
+        }
 
         if (leftover > 0) leftoverMaterials[itemName] = (leftoverMaterials[itemName] || 0) + leftover;
 
@@ -1407,8 +1420,14 @@ function calculateMultiQuantity() {
         return bFav - aFav;
       });
 
-      // 현재 시점 보유 수량을 제외하고 추가로 필요한 총 금액 계산
+      // 추가 필요 금액 계산 (재료비 + 모든 분해 단계의 수수료 포함)
       let additionalCraftCostSum = 0;
+      let totalFeeSum = 0;
+
+      // 수수료 총합 계산
+      Object.values(requiredFees).forEach(f => {
+        totalFeeSum += f;
+      });
 
       let html = `<b>합산 필요 재료 목록:</b><ul style="line-height: 2.1;">`;
       for (const mat of sortedMaterials) {
@@ -1424,7 +1443,7 @@ function calculateMultiQuantity() {
         const effPrice = getEffectivePrice(mat);
         const unitBuyPrice = priceStore[mat]?.buyPrice || 0;
 
-        // 추가 필요 금액 누적
+        // 순수 재료비 추가
         additionalCraftCostSum += effPrice * actualNeeded;
 
         const isExpanded = expandedCraftItems.has(mat) && !isDecomposeDisabled;
@@ -1456,6 +1475,17 @@ function calculateMultiQuantity() {
       }
       html += `</ul>`;
 
+      // 1. 제작 수수료 항목을 재료 아래에 별도로 합산 표시
+      if (Object.keys(requiredFees).length > 0) {
+        html += `<b>🔨 제작 발생 수수료 목록:</b><ul style="line-height: 1.8;">`;
+        for (const [item, feeAmount] of Object.entries(requiredFees)) {
+          html += `<li><small><b>${item}</b> 제작 수수료: <span style="font-weight:bold;">${formatCurrency(feeAmount)}</span></small></li>`;
+        }
+        // ✨ 수수료 총합 표시 추가
+        html += `<li style="border-top: 1px dashed #fca5a5; margin-top: 4px; padding-top: 4px;"><b>총 발생 수수료 합계:</b> <span style="color:#d32f2f; font-weight:bold; font-size:1.05em;">${formatCurrency(totalFeeSum)}</span></li>`;
+        html += `</ul>`;
+      }
+
       if (Object.keys(leftoverMaterials).length > 0) {
         html += `<b style="color: #2e7d32;">제작 후 남는 부산물:</b><ul>`;
         for (const [mat, qty] of Object.entries(leftoverMaterials)) {
@@ -1464,11 +1494,14 @@ function calculateMultiQuantity() {
         html += `</ul>`;
       }
 
+      // 2. 추가 필요 금액에 분해 과정에서 필요해진 상위 재료 수수료(totalFeeSum) 포함
+      additionalCraftCostSum += totalFeeSum;
+
       html += `
         <div style="margin-top: 15px; padding-top: 10px; border-top: 2px dashed #007bff; font-size: 1.05em;">
           <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: center;">
             <div><b>💰 예상 총 제작 비용:</b> <span style="color:#d32f2f; font-weight:bold;">${formatCurrency(totalCraftCostSum)}</span></div>
-            <div><b>🛍 현재 추가 필요 금액:</b> <span style="color:#2563eb; font-weight:bold;">${formatCurrency(additionalCraftCostSum)}</span></div>
+            <div><b>🛍 현재 추가 필요 금액:</b> <span style="color:#2563eb; font-weight:bold;">${formatCurrency(additionalCraftCostSum)}</span> <small style="font-size:0.8em; color:#666;">(재료비 + 발생 수수료 포함)</small></div>
           </div>
           ${totalBuyPriceSum > 0 ? `<div style="margin-top: 4px;"><b>🏷 예상 총 구매 비용:</b> <span style="color:#1976d2; font-weight:bold;">${formatCurrency(totalBuyPriceSum)}</span></div>` : ''}
         </div>
